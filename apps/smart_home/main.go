@@ -32,6 +32,11 @@ func main() {
 	temperatureService := services.NewTemperatureService(temperatureAPIURL)
 	log.Printf("Temperature service initialized with API URL: %s\n", temperatureAPIURL)
 
+	// Initialize telemetry client to use API Gateway instead of direct service calls
+	apiGatewayURL := getEnv("API_GATEWAY_URL", "http://api-gateway:8000")
+	telemetryClient := services.NewTelemetryClientViaGateway(apiGatewayURL)
+	log.Printf("Telemetry client initialized with API Gateway URL: %s\n", apiGatewayURL)
+
 	// Initialize router
 	router := gin.Default()
 
@@ -48,6 +53,10 @@ func main() {
 	// Register sensor routes
 	sensorHandler := handlers.NewSensorHandler(database, temperatureService)
 	sensorHandler.RegisterRoutes(apiRoutes)
+
+	// Register telemetry proxy routes (routes through API Gateway to Telemetry Service)
+	telemetryHandler := handlers.NewTelemetryHandler(telemetryClient)
+	telemetryHandler.RegisterRoutes(apiRoutes)
 
 	// Start server
 	srv := &http.Server{

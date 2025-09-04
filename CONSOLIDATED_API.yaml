@@ -1,0 +1,1239 @@
+openapi: 3.0.3
+info:
+  title: Smart Home Pro - Unified API Documentation
+  description: |
+    **Консолидированная документация всех микросервисов Smart Home Pro**
+    
+    Эта документация объединяет все API endpoints из 9 микросервисов платформы умного дома:
+    - API Gateway (порт 8000) - центральная точка входа
+    - Temperature API (порт 8081) - эмуляция IoT датчиков
+    - Device Service (порт 8082) - управление устройствами
+    - Telemetry Service (порт 8083) - сбор телеметрии
+    - User Service (порт 8084) - пользователи и аутентификация
+    - Billing Service (порт 8085) - тарифы и подписки  
+    - Smart Home App (порт 8080) - монолитное приложение (Legacy)
+    - Automation Service (порт 8087) - сценарии автоматизации
+    - Notification Service (порт 8088) - уведомления и WebSocket
+    
+    **Архитектурные принципы:**
+    - Microservices Architecture
+    - API Gateway Pattern
+    - Database-per-Service
+    - Event-Driven Architecture (Apache Kafka)
+    - CQRS для телеметрии
+    
+  version: 1.0.0
+  contact:
+    name: Smart Home Pro Team
+    email: team@smarthome-pro.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000
+    description: API Gateway (Recommended - Single Entry Point)
+  - url: http://localhost:8080
+    description: Smart Home App (Legacy)
+  - url: http://localhost:8081
+    description: Temperature API (Direct)
+  - url: http://localhost:8082
+    description: Device Service (Direct)
+  - url: http://localhost:8083
+    description: Telemetry Service (Direct)
+  - url: http://localhost:8084
+    description: User Service (Direct)
+  - url: http://localhost:8085
+    description: Billing Service (Direct)
+  - url: http://localhost:8087
+    description: Automation Service (Direct)
+  - url: http://localhost:8088
+    description: Notification Service (Direct)
+
+paths:
+  # ===============================================
+  # API GATEWAY ENDPOINTS (Port 8000)
+  # ===============================================
+  /gateway/status:
+    get:
+      summary: Gateway Status
+      description: Получить статус API Gateway и информацию о подключённых сервисах
+      tags: [API Gateway]
+      servers:
+        - url: http://localhost:8000
+      responses:
+        '200':
+          description: Gateway status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayStatus'
+
+  /gateway/services:
+    get:
+      summary: Available Services
+      description: Список всех доступных микросервисов через Gateway
+      tags: [API Gateway]
+      servers:
+        - url: http://localhost:8000
+      responses:
+        '200':
+          description: List of services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceInfo'
+
+  # ===============================================
+  # TEMPERATURE API ENDPOINTS (Port 8081)
+  # ===============================================
+  /temperature:
+    get:
+      summary: Get Temperature Data
+      description: Получить данные о температуре для указанной локации
+      tags: [Temperature API]
+      servers:
+        - url: http://localhost:8081
+      parameters:
+        - name: location
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ["Living Room", "Bedroom", "Kitchen"]
+          example: "Living Room"
+      responses:
+        '200':
+          description: Temperature data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemperatureReading'
+
+  # ===============================================
+  # DEVICE SERVICE ENDPOINTS (Port 8082)
+  # ===============================================
+  /api/v1/devices:
+    get:
+      summary: Get All Devices
+      description: Получить список всех устройств с фильтрацией
+      tags: [Device Management]
+      servers:
+        - url: http://localhost:8082
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: integer
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/DeviceType'
+        - name: location
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+    post:
+      summary: Create Device
+      description: Создать новое устройство
+      tags: [Device Management]
+      servers:
+        - url: http://localhost:8082
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCreateRequest'
+      responses:
+        '201':
+          description: Device created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+
+  /api/v1/devices/{id}:
+    get:
+      summary: Get Device by ID
+      description: Получить устройство по ID
+      tags: [Device Management]
+      servers:
+        - url: http://localhost:8082
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+      responses:
+        '200':
+          description: Device details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/devices/{id}/heartbeat:
+    post:
+      summary: Device Heartbeat
+      description: Отправить heartbeat от устройства
+      tags: [Device Management]
+      servers:
+        - url: http://localhost:8082
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ipAddress:
+                  type: string
+                  example: "192.168.1.100"
+      responses:
+        '200':
+          description: Heartbeat registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+
+  # ===============================================
+  # TELEMETRY SERVICE ENDPOINTS (Port 8083)
+  # ===============================================
+  /telemetry/readings:
+    get:
+      summary: Get Telemetry Readings
+      description: Получить показания телеметрии с пагинацией
+      tags: [Telemetry]
+      servers:
+        - url: http://localhost:8083
+      parameters:
+        - name: device_id
+          in: query
+          schema:
+            type: integer
+        - name: start_time
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end_time
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            maximum: 1000
+      responses:
+        '200':
+          description: Telemetry readings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  readings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TelemetryReading'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Submit Telemetry Reading
+      description: Отправить новые показания телеметрии
+      tags: [Telemetry]
+      servers:
+        - url: http://localhost:8083
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelemetrySubmission'
+      responses:
+        '201':
+          description: Reading submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryReading'
+
+  # ===============================================
+  # USER SERVICE ENDPOINTS (Port 8084)
+  # ===============================================
+  /api/v1/users:
+    get:
+      summary: Get All Users
+      description: Получить список пользователей (admin only)
+      tags: [User Management]
+      servers:
+        - url: http://localhost:8084
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      summary: Create User
+      description: Создать нового пользователя
+      tags: [User Management]
+      servers:
+        - url: http://localhost:8084
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /api/v1/auth/login:
+    post:
+      summary: User Login
+      description: Аутентификация пользователя и получение JWT токена
+      tags: [Authentication]
+      servers:
+        - url: http://localhost:8084
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 6
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  # ===============================================
+  # BILLING SERVICE ENDPOINTS (Port 8085)
+  # ===============================================
+  /api/v1/plans:
+    get:
+      summary: Get Pricing Plans
+      description: Получить все доступные тарифные планы
+      tags: [Billing]
+      servers:
+        - url: http://localhost:8085
+      responses:
+        '200':
+          description: List of pricing plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PricingPlan'
+
+  /api/v1/subscriptions:
+    post:
+      summary: Create Subscription
+      description: Создать новую подписку на тарифный план
+      tags: [Billing]
+      servers:
+        - url: http://localhost:8085
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionRequest'
+      responses:
+        '201':
+          description: Subscription created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+
+  /api/v1/payments:
+    post:
+      summary: Process Payment
+      description: Обработать платёж за подписку
+      tags: [Billing]
+      servers:
+        - url: http://localhost:8085
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Payment processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+
+  # ===============================================
+  # AUTOMATION SERVICE ENDPOINTS (Port 8087)
+  # ===============================================
+  /api/v1/scenarios:
+    get:
+      summary: Get User Scenarios
+      description: Получить сценарии автоматизации пользователя
+      tags: [Automation]
+      servers:
+        - url: http://localhost:8087
+      parameters:
+        - name: household_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of scenarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Scenario'
+    post:
+      summary: Create Scenario
+      description: Создать новый сценарий автоматизации
+      tags: [Automation]
+      servers:
+        - url: http://localhost:8087
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScenarioRequest'
+      responses:
+        '201':
+          description: Scenario created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scenario'
+
+  /api/v1/scenarios/{id}/execute:
+    post:
+      summary: Execute Scenario
+      description: Выполнить сценарий автоматизации
+      tags: [Automation]
+      servers:
+        - url: http://localhost:8087
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id:
+                  type: string
+      responses:
+        '202':
+          description: Scenario execution started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioExecution'
+
+  # ===============================================
+  # NOTIFICATION SERVICE ENDPOINTS (Port 8088)
+  # ===============================================
+  /api/v1/notifications:
+    post:
+      summary: Send Notification
+      description: Отправить уведомление пользователю
+      tags: [Notifications]
+      servers:
+        - url: http://localhost:8088
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+      responses:
+        '200':
+          description: Notification sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+
+  /api/v1/notifications/stats:
+    get:
+      summary: Notification Statistics
+      description: Получить статистику отправленных уведомлений
+      tags: [Notifications]
+      servers:
+        - url: http://localhost:8088
+      responses:
+        '200':
+          description: Notification statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationStats'
+
+  # ===============================================
+  # SMART HOME APP ENDPOINTS (Port 8080) - Legacy
+  # ===============================================
+  /api/v1/sensors:
+    get:
+      summary: Get All Sensors (Legacy)
+      description: Получить все датчики (Legacy монолитное приложение)
+      tags: [Smart Home App (Legacy)]
+      servers:
+        - url: http://localhost:8080
+      responses:
+        '200':
+          description: List of sensors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sensor'
+    post:
+      summary: Create Sensor (Legacy)
+      description: Создать новый датчик (Legacy)
+      tags: [Smart Home App (Legacy)]
+      servers:
+        - url: http://localhost:8080
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorCreateRequest'
+      responses:
+        '201':
+          description: Sensor created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sensor'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    DeviceId:
+      name: id
+      in: path
+      required: true
+      description: Уникальный идентификатор устройства
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+
+  responses:
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Unauthorized:
+      description: Неавторизованный доступ
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    # ===============================================
+    # COMMON SCHEMAS
+    # ===============================================
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: "Resource not found"
+        code:
+          type: string
+          example: "NOT_FOUND"
+
+    SuccessMessage:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 100
+        total:
+          type: integer
+          example: 1500
+        hasMore:
+          type: boolean
+          example: true
+
+    # ===============================================
+    # API GATEWAY SCHEMAS
+    # ===============================================
+    GatewayStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "healthy"
+        version:
+          type: string
+          example: "1.0.0"
+        uptime:
+          type: string
+          example: "2h 30m 45s"
+        services:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            device-service: "healthy"
+            telemetry-service: "healthy"
+            user-service: "healthy"
+
+    ServiceInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "device-service"
+        url:
+          type: string
+          example: "http://device-service:8082"
+        status:
+          type: string
+          example: "healthy"
+        version:
+          type: string
+          example: "1.0.0"
+
+    # ===============================================
+    # TEMPERATURE API SCHEMAS
+    # ===============================================
+    TemperatureReading:
+      type: object
+      required: [location, value, unit, status, timestamp]
+      properties:
+        location:
+          type: string
+          example: "Living Room"
+        value:
+          type: number
+          format: float
+          example: 23.45
+        unit:
+          type: string
+          example: "°C"
+        status:
+          type: string
+          example: "active"
+        timestamp:
+          type: string
+          format: date-time
+        description:
+          type: string
+          example: "Temperature sensor in Living Room"
+
+    # ===============================================
+    # DEVICE SERVICE SCHEMAS
+    # ===============================================
+    Device:
+      type: object
+      required: [id, name, type, location, status, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Living Room Temperature Sensor"
+        type:
+          $ref: '#/components/schemas/DeviceType'
+        location:
+          type: string
+          example: "Living Room"
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        user_id:
+          type: integer
+          example: 123
+        last_heartbeat:
+          type: string
+          format: date-time
+        ip_address:
+          type: string
+          example: "192.168.1.100"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    DeviceType:
+      type: string
+      enum: [TEMPERATURE, HUMIDITY, MOTION, LIGHT, SWITCH, CAMERA]
+      example: "TEMPERATURE"
+
+    DeviceStatus:
+      type: string
+      enum: [ONLINE, OFFLINE, ERROR, MAINTENANCE]
+      example: "ONLINE"
+
+    DeviceCreateRequest:
+      type: object
+      required: [name, type, location]
+      properties:
+        name:
+          type: string
+          example: "Kitchen Temperature Sensor"
+        type:
+          $ref: '#/components/schemas/DeviceType'
+        location:
+          type: string
+          example: "Kitchen"
+        user_id:
+          type: integer
+          example: 123
+
+    # ===============================================
+    # TELEMETRY SCHEMAS
+    # ===============================================
+    TelemetryReading:
+      type: object
+      required: [id, device_id, metric_name, value, timestamp]
+      properties:
+        id:
+          type: string
+          example: "reading_123456"
+        device_id:
+          type: integer
+          example: 1
+        metric_name:
+          type: string
+          example: "temperature"
+        value:
+          type: number
+          format: float
+          example: 23.45
+        unit:
+          type: string
+          example: "°C"
+        timestamp:
+          type: string
+          format: date-time
+        location:
+          type: string
+          example: "Living Room"
+        metadata:
+          type: object
+          additionalProperties: true
+
+    TelemetrySubmission:
+      type: object
+      required: [device_id, metric_name, value]
+      properties:
+        device_id:
+          type: integer
+          example: 1
+        metric_name:
+          type: string
+          example: "temperature"
+        value:
+          type: number
+          format: float
+          example: 24.1
+        unit:
+          type: string
+          example: "°C"
+        timestamp:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties: true
+
+    # ===============================================
+    # USER MANAGEMENT SCHEMAS
+    # ===============================================
+    User:
+      type: object
+      required: [id, email, first_name, last_name, role, created_at]
+      properties:
+        id:
+          type: integer
+          example: 123
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        role:
+          type: string
+          enum: [USER, ADMIN, MANAGER]
+          example: "USER"
+        household_id:
+          type: string
+          example: "household_456"
+        is_active:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UserCreateRequest:
+      type: object
+      required: [email, password, first_name, last_name]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        first_name:
+          type: string
+        last_name:
+          type: string
+        household_id:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refresh_token:
+          type: string
+          example: "def502004c7b8c3f..."
+        expires_in:
+          type: integer
+          example: 3600
+        user:
+          $ref: '#/components/schemas/User'
+
+    # ===============================================
+    # BILLING SCHEMAS
+    # ===============================================
+    PricingPlan:
+      type: object
+      required: [id, name, price, currency, billing_period]
+      properties:
+        id:
+          type: string
+          example: "plan_basic"
+        name:
+          type: string
+          example: "Basic Plan"
+        description:
+          type: string
+          example: "Perfect for small homes"
+        price:
+          type: number
+          format: decimal
+          example: 9.99
+        currency:
+          type: string
+          example: "USD"
+        billing_period:
+          type: string
+          enum: [MONTHLY, YEARLY]
+          example: "MONTHLY"
+        features:
+          type: array
+          items:
+            type: string
+          example: ["Up to 10 devices", "Basic automation", "Mobile app"]
+        is_active:
+          type: boolean
+          example: true
+
+    Subscription:
+      type: object
+      required: [id, user_id, plan_id, status, created_at]
+      properties:
+        id:
+          type: string
+          example: "sub_123456"
+        user_id:
+          type: string
+          example: "user_789"
+        plan_id:
+          type: string
+          example: "plan_basic"
+        status:
+          type: string
+          enum: [ACTIVE, CANCELLED, EXPIRED, PENDING]
+          example: "ACTIVE"
+        current_period_start:
+          type: string
+          format: date-time
+        current_period_end:
+          type: string
+          format: date-time
+        cancel_at_period_end:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          format: date-time
+
+    CreateSubscriptionRequest:
+      type: object
+      required: [user_id, plan_id]
+      properties:
+        user_id:
+          type: string
+        plan_id:
+          type: string
+        payment_method_id:
+          type: string
+
+    PaymentRequest:
+      type: object
+      required: [subscription_id, amount, currency]
+      properties:
+        subscription_id:
+          type: string
+        amount:
+          type: number
+          format: decimal
+        currency:
+          type: string
+          example: "USD"
+        payment_method_id:
+          type: string
+        description:
+          type: string
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "pay_123456"
+        subscription_id:
+          type: string
+        amount:
+          type: number
+          format: decimal
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED, REFUNDED]
+        processed_at:
+          type: string
+          format: date-time
+
+    # ===============================================
+    # AUTOMATION SCHEMAS
+    # ===============================================
+    Scenario:
+      type: object
+      required: [id, name, household_id, is_active, created_at]
+      properties:
+        id:
+          type: string
+          example: "scenario_123"
+        name:
+          type: string
+          example: "Morning Routine"
+        description:
+          type: string
+          example: "Turn on lights and adjust temperature"
+        household_id:
+          type: string
+          example: "household_456"
+        is_active:
+          type: boolean
+          example: true
+        triggers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScenarioTrigger'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScenarioAction'
+        created_at:
+          type: string
+          format: date-time
+
+    CreateScenarioRequest:
+      type: object
+      required: [name, household_id]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        household_id:
+          type: string
+
+    ScenarioTrigger:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [TIME, DEVICE_STATE, SENSOR_VALUE]
+        condition:
+          type: object
+          additionalProperties: true
+
+    ScenarioAction:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [DEVICE_CONTROL, NOTIFICATION, WEBHOOK]
+        parameters:
+          type: object
+          additionalProperties: true
+
+    ScenarioExecution:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "exec_789"
+        scenario_id:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, RUNNING, COMPLETED, FAILED]
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+
+    # ===============================================
+    # NOTIFICATION SCHEMAS
+    # ===============================================
+    NotificationRequest:
+      type: object
+      required: [userId, type, title, message]
+      properties:
+        userId:
+          type: string
+          example: "user123"
+        type:
+          type: string
+          enum: [info, warning, error, success, device_alert, automation_event]
+          example: "device_alert"
+        title:
+          type: string
+          example: "Device Alert"
+        message:
+          type: string
+          example: "Temperature sensor disconnected"
+        data:
+          type: object
+          additionalProperties: true
+          example:
+            deviceId: "temp_sensor_001"
+            location: "Living Room"
+
+    NotificationStats:
+      type: object
+      properties:
+        totalSent:
+          type: integer
+          example: 156
+        totalByType:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            device_alert: 45
+            automation_event: 38
+            info: 73
+        activeConnections:
+          type: integer
+          example: 12
+        uptime:
+          type: string
+          example: "2h 34m 12s"
+
+    # ===============================================
+    # SMART HOME APP (LEGACY) SCHEMAS
+    # ===============================================
+    Sensor:
+      type: object
+      required: [id, name, type, location, value, unit, status]
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Kitchen Temperature Sensor"
+        type:
+          type: string
+          example: "temperature"
+        location:
+          type: string
+          example: "Kitchen"
+        value:
+          type: number
+          format: float
+          example: 23.45
+        unit:
+          type: string
+          example: "°C"
+        status:
+          type: string
+          enum: [active, inactive, error, maintenance]
+          example: "active"
+        last_updated:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    SensorCreateRequest:
+      type: object
+      required: [name, type, location]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          example: "temperature"
+        location:
+          type: string
+        unit:
+          type: string
+          example: "°C"
+
+tags:
+  - name: API Gateway
+    description: Центральная точка входа для всех API запросов
+    externalDocs:
+      url: http://localhost:8000/swagger/index.html
+  - name: Temperature API
+    description: Эмуляция IoT датчиков температуры
+    externalDocs:
+      url: http://localhost:8081/swagger/index.html
+  - name: Device Management
+    description: Управление IoT устройствами
+    externalDocs:
+      url: http://localhost:8082/swagger-ui/swagger-ui/index.html
+  - name: Telemetry
+    description: Сбор и анализ телеметрических данных
+    externalDocs:
+      url: http://localhost:8083/docs
+  - name: User Management
+    description: Управление пользователями и домохозяйствами
+    externalDocs:
+      url: http://localhost:8084/swagger/index.html
+  - name: Authentication
+    description: Аутентификация и авторизация
+    externalDocs:
+      url: http://localhost:8084/swagger/index.html
+  - name: Billing
+    description: Тарифные планы, подписки и платежи
+    externalDocs:
+      url: http://localhost:8085/swagger/index.html
+  - name: Automation
+    description: Сценарии автоматизации умного дома
+    externalDocs:
+      url: http://localhost:8087/swagger/index.html
+  - name: Notifications
+    description: Уведомления и WebSocket связь
+    externalDocs:
+      url: http://localhost:8088/api-docs/
+  - name: Smart Home App (Legacy)
+    description: Монолитное приложение (Legacy система)
+    externalDocs:
+      url: ./apps/smart_home/swagger.yaml
+
+externalDocs:
+  description: Smart Home Pro - GitHub Repository
+  url: https://github.com/your-org/smart-home-pro

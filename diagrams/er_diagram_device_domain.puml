@@ -1,0 +1,29 @@
+@startuml
+!pragma charset UTF-8
+skinparam defaultFontName "Segoe UI"
+!define CORE_ENTITY(name,desc) class name as "desc" << (C,#FF6B6B) >>
+!define SUPPORT_ENTITY(name,desc) class name as "desc" << (S,#4ECDC4) >>
+
+title ER-диаграмма: Device Domain
+
+' Основные сущности (MVP)
+CORE_ENTITY(Device, "Device\n---\nid: SERIAL [PK]\nname: VARCHAR(100) [NOT NULL]\ntype: ENUM [NOT NULL]\nlocation: VARCHAR(100) [NOT NULL]\nstatus: ENUM [NOT NULL, DEFAULT='OFFLINE']\nmac_address: VARCHAR(17) [UNIQUE]\nip_address: VARCHAR(15)\nfirmware_version: VARCHAR(50)\nuser_id: BIGINT\ncreated_at: TIMESTAMP [NOT NULL, DEFAULT=NOW()]\nupdated_at: TIMESTAMP\nlast_seen: TIMESTAMP")
+
+' Внешние связи (минимальные)
+SUPPORT_ENTITY(User, "User\n(Внешний)\n---\nid: BIGINT [PK]\nemail: VARCHAR(255)\nfirst_name: VARCHAR(100)")
+
+' Основные связи
+User ||--o{ Device : "1:N владеет"
+DeviceType ||--o{ Device : "1:N определяет тип"
+DeviceStatus ||--o{ Device : "1:N определяет статус"
+
+' Enum-справочники (реализованы)
+SUPPORT_ENTITY(DeviceType, "DeviceType\n(ENUM)\n---\nTEMPERATURE_SENSOR\nHUMIDITY_SENSOR\nMOTION_SENSOR\nDOOR_SENSOR\nSMOKE_DETECTOR\nSMART_LIGHT\nSMART_PLUG\nTHERMOSTAT\nSECURITY_CAMERA\nSMART_LOCK\nGARAGE_DOOR\nSMART_SPEAKER")
+
+SUPPORT_ENTITY(DeviceStatus, "DeviceStatus\n(ENUM)\n---\nONLINE\nOFFLINE\nERROR\nMAINTENANCE\nCONFIGURING\nLOW_BATTERY")
+
+
+' Примечания
+note right of Device : **Текущая реализация:**\n• Device Service (Java/Spring Boot, порт 8082)\n• JPA Entity с валидацией (@Entity, @NotNull)\n• Управление устройствами с владельцами\n• Настройки сети (IP, MAC) - уникальный MAC\n• Отслеживание версии прошивки\n• @PreUpdate хук для автообновления updated_at\n• Время последней активности\n\n**Статусы (DeviceStatus ENUM):**\n• ONLINE, OFFLINE, ERROR\n• MAINTENANCE, CONFIGURING, LOW_BATTERY\n\n**Типы устройств (DeviceType ENUM):**\n• Датчики: TEMPERATURE, HUMIDITY, MOTION\n• Безопасность: DOOR_SENSOR, SMOKE_DETECTOR\n• Умные устройства: SMART_LIGHT, SMART_PLUG\n• Климат: THERMOSTAT\n• Доступ: SMART_LOCK, GARAGE_DOOR\n• Мультимедиа: SECURITY_CAMERA, SMART_SPEAKER
+
+@enduml

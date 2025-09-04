@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(C:\\Users\\Igor\\IdeaProjects\\architecture-pro-warmhouse\\diagrams/**)",
+      "Bash(find:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(go mod:*)",
+      "Bash(docker-compose:*)",
+      "Bash(curl:*)",
+      "Bash(timeout 30 grep -A 5 \"jackson:\" device-service/src/main/resources/application.yml)",
+      "Read(C:\\Users\\Igor\\IdeaProjects\\architecture-pro-warmhouse\\diagrams/**)",
+      "Read(C:\\Users\\Igor\\IdeaProjects\\architecture-pro-warmhouse\\diagrams/**)",
+      "Read(C:\\Users\\Igor\\IdeaProjects\\architecture-pro-warmhouse\\diagrams/**)",
+      "Bash(mkdir:*)",
+      "Bash(pip install:*)",
+      "Bash(python test:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker rm:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker volume rm:*)",
+      "Bash(java:*)",
+      "Bash(grep:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,26 @@
+@startuml
+!pragma charset UTF-8
+skinparam defaultFontName "Segoe UI"
+!define CORE_ENTITY(name,desc) class name as "desc" << (C,#FF6B6B) >>
+!define FUTURE_ENTITY(name,desc) class name as "desc" << (F,#DDDDDD) >>
+
+title ER-диаграмма: User Domain
+
+' РЕАЛИЗОВАННЫЕ СУЩНОСТИ
+CORE_ENTITY(User, "User\n---\nid: UUID [PK]\nemail: VARCHAR(255) [UNIQUE]\nfirst_name: VARCHAR(100)\nlast_name: VARCHAR(100)\nis_active: BOOLEAN\ncreated_at: TIMESTAMP\nupdated_at: TIMESTAMP")
+
+CORE_ENTITY(Household, "Household\n---\nid: UUID [PK]\nowner_id: UUID [FK]\nname: VARCHAR(100)\naddress: TEXT\ncreated_at: TIMESTAMP\nupdated_at: TIMESTAMP")
+
+
+' РЕАЛИЗОВАННЫЕ СВЯЗИ
+User ||--o{ Household : "1:N owns"
+
+
+' ПРИМЕЧАНИЯ
+note right of User : **Функции MVP:**\n✅ Базовый профиль пользователя (имя, email)\n✅ Отслеживание статуса аккаунта\n✅ Владение домом\n\n**Основа:**\n• Регистрация пользователей\n• Базовое управление профилем\n• Один дом на пользователя
+
+note left of Household : **Функции MVP:**\n✅ Базовая информация о доме\n✅ Простая модель владельца\n✅ Отслеживание адреса\n\n**Основа:**\n• Создание домов\n• Базовая информация о местоположении\n• Назначение владельца
+
+note top : **🏠 Статус User Domain:**\n\n**✅ MVP:** Базовая система User + Household
+
+@enduml

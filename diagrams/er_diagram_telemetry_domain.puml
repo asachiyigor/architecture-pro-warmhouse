@@ -1,0 +1,27 @@
+@startuml
+!pragma charset UTF-8
+skinparam defaultFontName "Segoe UI"
+!define CORE_ENTITY(name,desc) class name as "desc" << (C,#FF6B6B) >>
+!define SUPPORT_ENTITY(name,desc) class name as "desc" << (S,#4ECDC4) >>
+!define FUTURE_ENTITY(name,desc) class name as "desc" << (F,#DDDDDD) >>
+
+title ER-диаграмма: Telemetry Domain
+
+' РЕАЛИЗОВАННЫЕ СУЩНОСТИ
+CORE_ENTITY(TelemetryReading, "TelemetryReading\n---\nid: SERIAL [PK]\ndevice_id: VARCHAR(50)\ndevice_type: VARCHAR(50)\nlocation: VARCHAR(100)\nmetric_name: VARCHAR(50)\nvalue: FLOAT\nunit: VARCHAR(20)\ntimestamp: TIMESTAMP\ncreated_at: TIMESTAMP")
+
+' БУДУЩИЕ РАСШИРЕНИЯ
+
+' Внешние ссылки
+SUPPORT_ENTITY(Device, "Device\n(Внешний)\n---\nid: VARCHAR(50) [PK]\nname: VARCHAR(100)\ntype: VARCHAR(50)\nlocation: VARCHAR(100)")
+
+' РЕАЛИЗОВАННЫЕ СВЯЗИ (Сплошные)
+Device ||--o{ TelemetryReading : "1:N генерирует"
+
+
+' ПРИМЕЧАНИЯ
+note right of TelemetryReading : **Сбор данных MVP:**\n✅ Базовая поддержка метрик (температура)\n✅ Отслеживание устройства и местоположения\n✅ Простые временные метки\n\n**Метрики:**\n• температура (°C)\n• Базовые показания датчиков\n• Хранение сырых значений
+
+note bottom : **📊 Telemetry MVP:**\n\n**✅ MVP:** Только базовый сбор данных
+
+@enduml

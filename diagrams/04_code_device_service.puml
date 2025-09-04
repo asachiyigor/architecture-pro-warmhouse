@@ -1,0 +1,21 @@
+@startuml
+!pragma charset UTF-8
+skinparam defaultFontName "Segoe UI"
+
+!theme plain
+
+DeviceController --> DeviceService
+DeviceService --> DeviceRepository  
+DeviceService --> KafkaConfig
+DeviceRepository --> Device
+DeviceController --> DeviceDto
+Device --> DeviceType
+Device --> DeviceStatus
+DeviceDto --> DeviceType
+DeviceDto --> DeviceStatus
+DeviceService ..> DeviceEvent
+DeviceRepository --> PostgreSQL
+DeviceService --> Kafka
+Gateway --> DeviceController
+
+@enduml

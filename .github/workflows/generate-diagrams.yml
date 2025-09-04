@@ -1,0 +1,30 @@
+name: Generate PlantUML Diagrams
+
+on:
+  push:
+    paths:
+      - 'diagrams/*.puml'
+  pull_request:
+    paths:
+      - 'diagrams/*.puml'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Generate PlantUML diagrams
+        uses: cloudbees/plantuml-github-action@master
+        with:
+          args: -v -tpng diagrams/*.puml
+          
+      - name: Commit generated images
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add diagrams/*.png
+          git commit -m "Auto-generate diagram images" || exit 0
+          git push
