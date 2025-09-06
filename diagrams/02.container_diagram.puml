@@ -1,0 +1,91 @@
+@startuml
+!pragma charset UTF-8
+skinparam defaultFontName "Segoe UI"
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Диаграмма контейнеров целевой системы "Умный дом" (TO-BE)
+
+Person(homeowner, "Владелец дома", "Управляет устройствами, настраивает сценарии, просматривает телеметрию")
+Person(support_team, "Команда поддержки", "Техническая поддержка пользователей")
+
+System_Boundary(smart_home_platform, "Платформа «Умный дом» - Микросервисная архитектура") {
+    
+    Container(web_app, "Веб-приложение", "React/Vue.js", "SaaS интерфейс для управления устройствами и настройки сценариев")
+    Container(mobile_app, "Мобильное приложение", "React Native/Flutter", "Мобильный доступ к управлению умным домом")
+    Container(support_portal, "Портал поддержки", "React/Admin UI", "Интерфейс для команды технической поддержки")
+    
+    Container(api_gateway, "API Gateway", "Go", "Единая точка входа, аутентификация, маршрутизация к микросервисам")
+    
+    ' Микросервисы по доменам
+    Container(device_service, "Device Management Service", "Java/Spring Boot", "Управление устройствами: регистрация, конфигурация, статус")
+    Container(automation_service, "Automation Service", "Go", "Сценарии автоматизации, правила, триггеры")
+    Container(telemetry_service, "Telemetry Service", "Python/FastAPI", "Сбор и обработка телеметрии с устройств")
+    Container(user_service, "User Management Service", "Go", "Управление пользователями, профили, аутентификация")
+    Container(billing_service, "Billing Service", "Go", "Управление подписками, тарифами, платежами")
+    Container(notification_service, "Notification Service", "Node.js", "Уведомления, алерты, push-сообщения")
+    
+    ' Асинхронная обработка
+    Container(message_broker, "Message Broker", "Apache Kafka", "Асинхронная обработка событий между микросервисами")
+    
+    ' Хранилища данных
+    ContainerDb(user_db, "User Database", "PostgreSQL", "Пользователи, профили, настройки")
+    ContainerDb(device_db, "Device Database", "PostgreSQL", "Устройства, конфигурации, статус")
+    ContainerDb(automation_db, "Automation Database", "PostgreSQL", "Сценарии автоматизации и правила")
+    ContainerDb(telemetry_db, "Telemetry Database", "InfluxDB", "Временные ряды телеметрических данных")
+    ContainerDb(billing_db, "Billing Database", "PostgreSQL", "Подписки, платежи, тарифы")
+    ContainerDb(cache, "Cache", "Redis", "Кеширование сессий и частых запросов")
+}
+
+System_Ext(smart_devices, "Умные устройства", "IoT устройства в домах: отопление, свет, ворота, камеры")
+System_Ext(partner_devices, "Устройства партнёров", "Сторонние совместимые устройства с стандартными протоколами")
+System_Ext(payment_system, "Платёжная система", "Внешний сервис обработки платежей Stripe/PayPal")
+
+' Пользовательские интерфейсы
+Rel(homeowner, web_app, "Использует", "HTTPS")
+Rel(homeowner, mobile_app, "Использует", "HTTPS")
+Rel(support_team, support_portal, "Предоставляет поддержку", "HTTPS")
+
+' API Gateway маршрутизация
+Rel(web_app, api_gateway, "API вызовы", "HTTPS/REST")
+Rel(mobile_app, api_gateway, "API вызовы", "HTTPS/REST")
+Rel(support_portal, api_gateway, "Support API", "HTTPS/REST")
+
+' API Gateway к микросервисам
+Rel(api_gateway, device_service, "Управление устройствами", "HTTP/gRPC")
+Rel(api_gateway, automation_service, "Автоматизация", "HTTP/REST")
+Rel(api_gateway, telemetry_service, "Телеметрия", "HTTP/REST")
+Rel(api_gateway, user_service, "Пользователи", "HTTP/gRPC")
+Rel(api_gateway, billing_service, "Биллинг", "HTTP/REST")
+
+' Микросервисы к базам данных
+Rel(device_service, device_db, "Читает/записывает", "PostgreSQL")
+Rel(automation_service, automation_db, "Читает/записывает", "PostgreSQL")
+Rel(telemetry_service, telemetry_db, "Записывает временные ряды", "InfluxDB")
+Rel(user_service, user_db, "Читает/записывает", "PostgreSQL")
+Rel(billing_service, billing_db, "Читает/записывает", "PostgreSQL")
+
+' Кеширование
+Rel(user_service, cache, "Кеширует сессии", "Redis")
+Rel(device_service, cache, "Кеширует статус устройств", "Redis")
+Rel(telemetry_service, cache, "Кеширует последние показания", "Redis")
+
+' Асинхронные события
+Rel(device_service, message_broker, "События устройств", "Kafka")
+Rel(automation_service, message_broker, "События автоматизации", "Kafka")
+Rel(telemetry_service, message_broker, "События телеметрии", "Kafka")
+Rel(billing_service, message_broker, "События платежей", "Kafka")
+
+Rel(message_broker, notification_service, "События для уведомлений", "Kafka Consumer")
+
+' Взаимодействие с внешними системами
+Rel(device_service, smart_devices, "Управление и мониторинг", "MQTT/CoAP/HTTP")
+Rel(device_service, partner_devices, "Интеграция", "Стандартные IoT протоколы")
+Rel(telemetry_service, smart_devices, "Сбор телеметрии", "MQTT/HTTP")
+Rel(telemetry_service, partner_devices, "Сбор телеметрии", "Стандартные протоколы")
+Rel(billing_service, payment_system, "Обработка платежей", "HTTPS/API")
+
+' Уведомления пользователям
+Rel(notification_service, web_app, "Push уведомления", "WebSocket")
+Rel(notification_service, mobile_app, "Push уведомления", "FCM/APNS")
+
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+!pragma charset UTF-8
+skinparam defaultFontName "Segoe UI"
+!define CORE_ENTITY(name,desc) class name as "desc" << (C,#FF6B6B) >>
+!define SUPPORT_ENTITY(name,desc) class name as "desc" << (S,#4ECDC4) >>
+!define FUTURE_ENTITY(name,desc) class name as "desc" << (F,#DDDDDD) >>
+
+title ER-диаграмма: Automation Domain
+
+' РЕАЛИЗОВАННЫЕ СУЩНОСТИ
+CORE_ENTITY(Scenario, "Scenario\n---\nid: UUID [PK]\nhousehold_id: UUID [FK]\ncreated_by: UUID [FK]\nname: VARCHAR(100)\ndescription: TEXT\nis_active: BOOLEAN\ncreated_at: TIMESTAMP\nupdated_at: TIMESTAMP")
+
+CORE_ENTITY(ScenarioAction, "ScenarioAction\n---\nid: UUID [PK]\nscenario_id: UUID [FK]\ndevice_id: VARCHAR(100)\naction_type: VARCHAR(50)\nparameters: TEXT\norder_position: INTEGER\ncreated_at: TIMESTAMP")
+
+
+' Внешние ссылки
+SUPPORT_ENTITY(Household, "Household\n(Внешний)\n---\nid: UUID [PK]\nowner_id: UUID [FK]\nname: VARCHAR(100)")
+
+SUPPORT_ENTITY(User, "User\n(Внешний)\n---\nid: UUID [PK]\nemail: VARCHAR(255)")
+
+SUPPORT_ENTITY(Device, "Device\n(Внешний)\n---\nid: VARCHAR(100) [PK]\nname: VARCHAR(100)\ntype: VARCHAR(50)")
+
+' РЕАЛИЗОВАННЫЕ СВЯЗИ (Сплошные)
+Household ||--o{ Scenario : "1:N содержит"
+User ||--o{ Scenario : "1:N создает"
+Scenario ||--o{ ScenarioAction : "1:N определяет"
+ScenarioAction ||--o| Device : "N:1 использует"
+
+
+' ПРИМЕЧАНИЯ
+note right of Scenario : **Функции MVP:**\n✅ Базовые сценарии автоматизации\n✅ Ручное выполнение\n✅ Простые действия устройств\n✅ Описания сценариев\n\n**Примеры:**\n• "Уход из дома" (вручную)\n• "Вечер кино" (вручную)\n• Базовые сценарии вкл/выкл
+
+note left of ScenarioAction : **MVP действия:**\n✅ turn_on / turn_off\n✅ Базовое управление устройствами\n✅ Последовательное выполнение (упорядоченное)\n\n**Функции:**\n• Простые типы действий\n• Базовые параметры\n• Нацеливание на устройства
+
+@enduml

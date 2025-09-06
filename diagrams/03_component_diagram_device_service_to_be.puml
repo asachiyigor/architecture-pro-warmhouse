@@ -1,0 +1,101 @@
+@startuml
+!pragma charset UTF-8
+skinparam defaultFontName "Segoe UI"
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Компонентная диаграмма - Device Management Service (TO-BE)
+
+Container_Boundary(device_service, "Device Management Service - Java/Spring Boot") {
+    
+    ' API компоненты
+    Component(device_api, "Device API Handler", "Spring REST Controller", "REST API для управления устройствами: CRUD операции, статус, конфигурация")
+    Component(device_command_api, "Device Command API", "Spring REST Controller", "API для отправки команд управления устройствами")
+    Component(device_integration_api, "Integration API", "Spring REST Controller", "API для интеграции с внешними IoT устройствами")
+    
+    ' Бизнес-логика
+    Component(device_management, "Device Management Service", "Spring Service", "Основная бизнес-логика управления устройствами и их жизненным циклом")
+    Component(device_command_service, "Device Command Service", "Spring Service", "Сервис отправки команд и управления устройствами")
+    Component(device_status_monitor, "Device Status Monitor", "Spring Service", "Мониторинг статуса устройств и отслеживание их доступности")
+    Component(device_validator, "Device Validator", "Spring Component", "Валидация устройств и их конфигураций")
+    
+    ' Интеграционные компоненты
+    Component(iot_protocol_adapter, "IoT Protocol Adapter", "Spring Component", "Адаптер для работы с различными IoT протоколами (MQTT, CoAP, HTTP)")
+    Component(partner_integration, "Partner Device Integration", "Spring Component", "Интеграция с устройствами партнёров через стандартные протоколы")
+    Component(event_publisher, "Event Publisher", "Kafka Producer Client", "Публикация событий устройств в Kafka для других микросервисов")
+    
+    ' Хранение данных
+    Component(device_repository, "Device Repository", "Spring Data JPA", "Репозиторий для работы с данными устройств в PostgreSQL")
+    Component(device_cache, "Device Cache Manager", "Spring Redis", "Управление кешированием статуса устройств в Redis")
+    Component(device_config_store, "Device Config Store", "Spring Component", "Хранение и управление конфигурациями устройств")
+    
+    ' Модели данных
+    Component(device_models, "Device Models", "JPA Entities", "Модели данных устройств: Device, DeviceType, DeviceStatus, Configuration")
+    Component(device_dto, "Device DTOs", "Java DTOs", "Объекты передачи данных для API: DeviceDto, CommandDto, StatusDto")
+}
+
+' Внешние зависимости из container диаграммы
+Container(api_gateway, "API Gateway", "Go", "Единая точка входа и маршрутизация")
+ContainerDb(device_db, "Device Database", "PostgreSQL", "База данных устройств")
+ContainerDb(cache, "Cache", "Redis", "Кеш статуса устройств")
+Container(message_broker, "Message Broker", "Apache Kafka", "Брокер сообщений")
+
+' Внешние системы из context диаграммы
+System_Ext(smart_devices, "Умные устройства", "IoT устройства в домах: отопление, свет, ворота, камеры")
+System_Ext(partner_devices, "Устройства партнёров", "Сторонние совместимые устройства")
+
+' Другие микросервисы из container диаграммы
+Container(automation_service, "Automation Service", "Go", "Сценарии автоматизации")
+Container(telemetry_service, "Telemetry Service", "Python/FastAPI", "Сбор телеметрии")
+Container(notification_service, "Notification Service", "Node.js", "Уведомления")
+
+' Связи с API Gateway
+Rel(api_gateway, device_api, "Маршрутизация CRUD запросов", "HTTP/gRPC")
+Rel(api_gateway, device_command_api, "Маршрутизация команд управления", "HTTP/gRPC")
+Rel(api_gateway, device_integration_api, "Маршрутизация интеграционных запросов", "HTTP/gRPC")
+
+' Внутренние связи API -> Service
+Rel(device_api, device_management, "Делегирование бизнес-логики", "Method calls")
+Rel(device_command_api, device_command_service, "Отправка команд устройствам", "Method calls")
+Rel(device_integration_api, partner_integration, "Интеграция партнёрских устройств", "Method calls")
+
+' Связи между сервисами
+Rel(device_management, device_validator, "Валидация устройств", "Method calls")
+Rel(device_management, device_repository, "CRUD операции с БД", "JPA calls")
+Rel(device_management, device_cache, "Кеширование статуса", "Redis calls")
+Rel(device_management, event_publisher, "Публикация событий", "Kafka publish")
+
+Rel(device_command_service, iot_protocol_adapter, "Отправка команд через IoT протоколы", "MQTT/CoAP/HTTP")
+Rel(device_command_service, device_status_monitor, "Обновление статуса после команд", "Method calls")
+
+Rel(device_status_monitor, device_cache, "Обновление кеша статуса", "Redis calls")
+Rel(device_status_monitor, event_publisher, "События изменения статуса", "Kafka publish")
+
+' Связи с хранилищами данных
+Rel(device_repository, device_db, "SQL запросы", "PostgreSQL/pgx")
+Rel(device_repository, device_models, "Маппинг JPA сущностей", "JPA mapping")
+
+Rel(device_cache, cache, "Операции кеширования", "Redis protocol")
+
+Rel(device_config_store, device_db, "Хранение конфигураций", "PostgreSQL")
+Rel(device_config_store, device_models, "Модели конфигураций", "JPA mapping")
+
+' Связи с внешними устройствами
+Rel(iot_protocol_adapter, smart_devices, "Управление и мониторинг", "MQTT/CoAP/HTTP")
+Rel(partner_integration, partner_devices, "Интеграция", "Стандартные IoT протоколы")
+
+' События в Kafka
+Rel(event_publisher, message_broker, "События устройств", "Kafka produce")
+Rel(message_broker, automation_service, "События для автоматизации", "Kafka consume")
+Rel(message_broker, telemetry_service, "События для телеметрии", "Kafka consume") 
+Rel(message_broker, notification_service, "События для уведомлений", "Kafka consume")
+
+' DTO использование
+Rel(device_api, device_dto, "Сериализация API ответов", "JSON struct tags")
+Rel(device_command_api, device_dto, "Команды и статусы", "JSON struct tags")
+Rel(device_integration_api, device_dto, "Интеграционные DTO", "JSON struct tags")
+
+note top of device_service : **🏗️ АРХИТЕКТУРА TO-BE МИКРОСЕРВИСА:**\n\n**📋 КЛЮЧЕВЫЕ ВОЗМОЖНОСТИ:**\n• Управление жизненным циклом устройств\n• Отправка команд управления через IoT протоколы\n• Мониторинг статуса и доступности устройств\n• Интеграция с партнёрскими устройствами\n• Event-driven архитектура через Kafka\n\n**🔄 ПРОТОКОЛЫ ИНТЕГРАЦИИ:**\n• MQTT для легковесных IoT устройств\n• CoAP для устройств с ограниченными ресурсами\n• HTTP REST для веб-совместимых устройств\n• Стандартные протоколы партнёров
+
+note bottom : **⚡ ПРОИЗВОДИТЕЛЬНОСТЬ И НАДЁЖНОСТЬ:**\n\n**🚀 ОПТИМИЗАЦИИ:**\n• Redis кеширование для быстрого доступа к статусу\n• Асинхронная обработка событий через Kafka\n• Connection pooling для IoT протоколов\n• JPA оптимизации для работы с БД\n• Spring @Async для concurrent операций\n\n**🔒 ENTERPRISE ГОТОВНОСТЬ:**\n• Валидация входных данных\n• Мониторинг состояния устройств\n• Graceful degradation при недоступности устройств\n• Event sourcing для аудита операций\n\n**🎯 ИНТЕГРАЦИОННАЯ ГОТОВНОСТЬ:**\n• API Gateway интеграция для маршрутизации\n• Kafka события для межсервисного взаимодействия\n• Поддержка множественных IoT протоколов
+
+@enduml

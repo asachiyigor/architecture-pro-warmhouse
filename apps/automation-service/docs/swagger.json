@@ -1,0 +1,12 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Микросервис для управления сценариями автоматизации умного дома",
+        "title": "Automation Service API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8086",
+    "basePath": "/api/v1",
+    "paths": {}
+}

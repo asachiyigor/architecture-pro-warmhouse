@@ -1,0 +1,513 @@
+openapi: 3.0.3
+info:
+  title: Smart Home Management API
+  description: |
+    Основной API для управления устройствами умного дома.
+    Предоставляет функции управления датчиками, получения данных и управления состоянием устройств.
+  version: 1.0.0
+  contact:
+    name: Smart Home Team
+    email: smarthome@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: http://smarthome-app:8080
+    description: Docker internal network
+
+paths:
+  /health:
+    get:
+      summary: Проверка состояния основного сервиса
+      description: Проверяет работоспособность основного сервиса умного дома
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Сервис работает корректно
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /api/v1/sensors:
+    get:
+      summary: Получить список всех датчиков
+      description: |
+        Возвращает список всех зарегистрированных датчиков в системе.
+        Для температурных датчиков автоматически подтягивает актуальные данные из Temperature API.
+      operationId: getSensors
+      tags:
+        - Sensors
+      responses:
+        '200':
+          description: Список датчиков получен успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sensor'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Создать новый датчик
+      description: Регистрирует новый датчик в системе умного дома
+      operationId: createSensor
+      tags:
+        - Sensors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorCreate'
+            examples:
+              temperature_sensor:
+                summary: Датчик температуры
+                value:
+                  name: "Kitchen Temperature Sensor"
+                  type: "temperature"
+                  location: "Kitchen"
+                  unit: "°C"
+      responses:
+        '201':
+          description: Датчик успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sensor'
+        '400':
+          description: Неверный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/sensors/{id}:
+    get:
+      summary: Получить датчик по ID
+      description: |
+        Возвращает информацию о конкретном датчике по его ID.
+        Для температурных датчиков подтягивает актуальные данные из Temperature API.
+      operationId: getSensorById
+      tags:
+        - Sensors
+      parameters:
+        - name: id
+          in: path
+          description: Уникальный идентификатор датчика
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: Датчик найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sensor'
+        '400':
+          description: Неверный ID датчика
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Датчик не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Обновить информацию о датчике
+      description: Обновляет параметры существующего датчика
+      operationId: updateSensor
+      tags:
+        - Sensors
+      parameters:
+        - name: id
+          in: path
+          description: Уникальный идентификатор датчика
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorUpdate'
+            examples:
+              update_location:
+                summary: Обновление местоположения
+                value:
+                  name: "Updated Kitchen Sensor"
+                  location: "Kitchen - Near Window"
+                  status: "active"
+      responses:
+        '200':
+          description: Датчик успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sensor'
+        '400':
+          description: Неверный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Удалить датчик
+      description: Удаляет датчик из системы по его ID
+      operationId: deleteSensor
+      tags:
+        - Sensors
+      parameters:
+        - name: id
+          in: path
+          description: Уникальный идентификатор датчика
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: Датчик успешно удален
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Sensor deleted successfully"
+        '400':
+          description: Неверный ID датчика
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/sensors/{id}/value:
+    patch:
+      summary: Обновить значение датчика
+      description: |
+        Обновляет текущее значение и статус конкретного датчика.
+        Используется для получения данных от IoT устройств.
+      operationId: updateSensorValue
+      tags:
+        - Sensors
+      parameters:
+        - name: id
+          in: path
+          description: Уникальный идентификатор датчика
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - value
+                - status
+              properties:
+                value:
+                  type: number
+                  format: float
+                  description: Новое значение датчика
+                  example: 23.5
+                status:
+                  type: string
+                  description: Статус датчика
+                  enum: [active, inactive, error, maintenance]
+                  example: "active"
+            examples:
+              temperature_update:
+                summary: Обновление температуры
+                value:
+                  value: 24.3
+                  status: "active"
+      responses:
+        '200':
+          description: Значение датчика успешно обновлено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Sensor value updated successfully"
+        '400':
+          description: Неверный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/sensors/temperature/{location}:
+    get:
+      summary: Получить температуру по местоположению
+      description: |
+        Получает актуальные данные о температуре для указанной комнаты
+        напрямую из Temperature API.
+      operationId: getTemperatureByLocation
+      tags:
+        - Temperature
+      parameters:
+        - name: location
+          in: path
+          description: Название комнаты
+          required: true
+          schema:
+            type: string
+            enum: ["Living Room", "Bedroom", "Kitchen"]
+          example: "Living Room"
+      responses:
+        '200':
+          description: Данные о температуре получены успешно
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - location
+                  - value
+                  - unit
+                  - status
+                  - timestamp
+                  - description
+                properties:
+                  location:
+                    type: string
+                    description: Название комнаты
+                    example: "Living Room"
+                  value:
+                    type: number
+                    format: float
+                    description: Значение температуры
+                    example: 23.45
+                  unit:
+                    type: string
+                    description: Единица измерения
+                    example: "°C"
+                  status:
+                    type: string
+                    description: Статус датчика
+                    example: "active"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: Время измерения
+                    example: "2024-01-15T10:30:00Z"
+                  description:
+                    type: string
+                    description: Описание датчика
+                    example: "Temperature sensor in Living Room"
+        '400':
+          description: Неверный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Ошибка получения данных от Temperature API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Sensor:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - location
+        - value
+        - unit
+        - status
+        - last_updated
+        - created_at
+      properties:
+        id:
+          type: integer
+          description: Уникальный идентификатор датчика
+          example: 1
+        name:
+          type: string
+          description: Название датчика
+          example: "Kitchen Temperature Sensor"
+          maxLength: 100
+        type:
+          type: string
+          description: Тип датчика
+          enum: [temperature]
+          example: "temperature"
+        location:
+          type: string
+          description: Местоположение датчика
+          example: "Kitchen"
+          maxLength: 100
+        value:
+          type: number
+          format: float
+          description: Текущее значение датчика
+          example: 23.45
+        unit:
+          type: string
+          description: Единица измерения
+          example: "°C"
+          maxLength: 20
+        status:
+          type: string
+          description: Статус датчика
+          enum: [active, inactive, error, maintenance]
+          example: "active"
+        last_updated:
+          type: string
+          format: date-time
+          description: Время последнего обновления данных
+          example: "2024-01-15T10:30:00Z"
+        created_at:
+          type: string
+          format: date-time
+          description: Время создания датчика
+          example: "2024-01-15T09:00:00Z"
+
+    SensorCreate:
+      type: object
+      required:
+        - name
+        - type
+        - location
+      properties:
+        name:
+          type: string
+          description: Название датчика
+          example: "Kitchen Temperature Sensor"
+          maxLength: 100
+        type:
+          type: string
+          description: Тип датчика
+          enum: [temperature]
+          example: "temperature"
+        location:
+          type: string
+          description: Местоположение датчика
+          example: "Kitchen"
+          maxLength: 100
+        unit:
+          type: string
+          description: Единица измерения (опционально)
+          example: "°C"
+          maxLength: 20
+
+    SensorUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Новое название датчика
+          example: "Updated Kitchen Sensor"
+          maxLength: 100
+        type:
+          type: string
+          description: Новый тип датчика
+          enum: [temperature]
+          example: "temperature"
+        location:
+          type: string
+          description: Новое местоположение датчика
+          example: "Kitchen - Near Window"
+          maxLength: 100
+        value:
+          type: number
+          format: float
+          description: Новое значение датчика
+          example: 24.5
+        unit:
+          type: string
+          description: Новая единица измерения
+          example: "°C"
+          maxLength: 20
+        status:
+          type: string
+          description: Новый статус датчика
+          enum: [active, inactive, error, maintenance]
+          example: "active"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Описание ошибки
+          example: "Sensor not found"
+
+tags:
+  - name: Health
+    description: Проверка состояния сервиса
+  - name: Sensors
+    description: Управление датчиками умного дома
+  - name: Temperature
+    description: Получение данных о температуре
+
+externalDocs:
+  description: GitHub Repository
+  url: https://github.com/your-org/smart-home

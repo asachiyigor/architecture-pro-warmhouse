@@ -1,0 +1,32 @@
+@startuml
+!pragma charset UTF-8
+skinparam defaultFontName "Segoe UI"
+!define CORE_ENTITY(name,desc) class name as "desc" << (C,#FF6B6B) >>
+!define SUPPORT_ENTITY(name,desc) class name as "desc" << (S,#4ECDC4) >>
+!define FUTURE_ENTITY(name,desc) class name as "desc" << (F,#DDDDDD) >>
+
+title ER-диаграмма: Billing Domain
+
+' MVP СУЩНОСТИ
+CORE_ENTITY(PricingPlan, "PricingPlan\n---\nid: UUID [PK]\nname: VARCHAR(100)\ndescription: TEXT\nprice: DECIMAL(10,2)\nbilling_interval: VARCHAR(20)\ndevice_limit: INTEGER\nis_active: BOOLEAN\ncreated_at: TIMESTAMP\nupdated_at: TIMESTAMP")
+
+CORE_ENTITY(Subscription, "Subscription\n---\nid: UUID [PK]\nuser_id: UUID [FK]\nplan_id: UUID [FK]\nstatus: VARCHAR(20)\nstarted_at: TIMESTAMP\nends_at: TIMESTAMP\ncreated_at: TIMESTAMP\nupdated_at: TIMESTAMP")
+
+' БУДУЩИЕ РАСШИРЕНИЯ
+
+' Внешняя ссылка
+SUPPORT_ENTITY(User, "User\n(Внешний)\n---\nid: UUID [PK]\nemail: VARCHAR(255)")
+
+' MVP СВЯЗИ (Сплошные)
+PricingPlan ||--o{ Subscription : "1:N определяет"
+User ||--o{ Subscription : "1:N имеет"
+
+
+' ПРИМЕЧАНИЯ
+note right of PricingPlan : **Тарифы:**\n✅ Базовый ($9.99/мес, 5 устройств)\n✅ Стандарт ($19.99/мес, 15 устройств)\n✅ Премиум ($39.99/мес, 50 устройств)\n\n**Функции:**\n• Простая структура тарифов\n• Месячная оплата\n• Лимиты устройств\n• Базовое отслеживание
+
+note left of Subscription : **Статусы:**\n✅ активна - платящий клиент\n✅ отменена - завершенная подписка\n\n**Функции:**\n• Базовое отслеживание подписки\n• Простое управление статусом\n• Даты начала/окончания
+
+note bottom : **💰 Billing:**\n\n**✅ **  Только базовые тарифные планы
+
+@enduml

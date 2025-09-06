@@ -1,0 +1,193 @@
+openapi: 3.0.3
+info:
+  title: Temperature API
+  description: |
+    Микросервис для получения данных о температуре с датчиков умного дома.
+    Предоставляет случайные значения температуры для различных комнат.
+  version: 1.0.0
+  contact:
+    name: Smart Home Team
+    email: smarthome@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8081
+    description: Development server
+  - url: http://temperature-api:8081
+    description: Docker internal network
+
+paths:
+  /health:
+    get:
+      summary: Проверка состояния сервиса
+      description: Endpoint для проверки работоспособности сервиса
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Сервис работает корректно
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /temperature:
+    get:
+      summary: Получить температуру по названию комнаты
+      description: |
+        Возвращает случайное значение температуры для указанной комнаты.
+        Если комната не указана, возвращает ошибку.
+      operationId: getTemperatureByLocation
+      tags:
+        - Temperature
+      parameters:
+        - name: location
+          in: query
+          description: Название комнаты (Living Room, Bedroom, Kitchen)
+          required: true
+          schema:
+            type: string
+            enum:
+              - Living Room
+              - Bedroom
+              - Kitchen
+          example: Living Room
+      responses:
+        '200':
+          description: Данные о температуре успешно получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemperatureData'
+        '400':
+          description: Неверный запрос - не указана комната
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /temperature/{sensorId}:
+    get:
+      summary: Получить температуру по ID датчика
+      description: |
+        Возвращает случайное значение температуры для указанного датчика.
+        Автоматически определяет комнату по ID датчика.
+      operationId: getTemperatureBySensorId
+      tags:
+        - Temperature
+      parameters:
+        - name: sensorId
+          in: path
+          description: Идентификатор датчика
+          required: true
+          schema:
+            type: string
+            enum:
+              - "1"
+              - "2" 
+              - "3"
+          example: "1"
+      responses:
+        '200':
+          description: Данные о температуре успешно получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemperatureData'
+        '400':
+          description: Неверный запрос - неправильный ID датчика
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    TemperatureData:
+      type: object
+      required:
+        - value
+        - unit
+        - timestamp
+        - location
+        - status
+        - sensor_id
+        - sensor_type
+        - description
+      properties:
+        value:
+          type: number
+          format: float
+          description: Значение температуры
+          example: 23.45
+          minimum: -50
+          maximum: 100
+        unit:
+          type: string
+          description: Единица измерения
+          example: "°C"
+          enum:
+            - "°C"
+        timestamp:
+          type: string
+          format: date-time
+          description: Время измерения в формате ISO 8601
+          example: "2024-01-15T10:30:00Z"
+        location:
+          type: string
+          description: Название комнаты
+          example: "Living Room"
+          enum:
+            - Living Room
+            - Bedroom
+            - Kitchen
+            - Unknown
+        status:
+          type: string
+          description: Статус датчика
+          example: "active"
+          enum:
+            - active
+            - inactive
+            - error
+        sensor_id:
+          type: string
+          description: Уникальный идентификатор датчика
+          example: "1"
+        sensor_type:
+          type: string
+          description: Тип датчика
+          example: "temperature"
+          enum:
+            - temperature
+        description:
+          type: string
+          description: Описание датчика
+          example: "Temperature sensor in Living Room"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Описание ошибки
+          example: "Location is required"
+
+tags:
+  - name: Health
+    description: Endpoints для проверки состояния сервиса
+  - name: Temperature
+    description: Endpoints для работы с данными температуры
+
+externalDocs:
+  description: GitHub Repository
+  url: https://github.com/your-org/smart-home

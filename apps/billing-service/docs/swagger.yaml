@@ -1,0 +1,9 @@
+basePath: /api/v1
+host: localhost:8085
+info:
+  contact: {}
+  description: Микросервис для управления платежами, тарифами и подписками
+  title: Billing Service API
+  version: "1.0"
+paths: {}
+swagger: "2.0"

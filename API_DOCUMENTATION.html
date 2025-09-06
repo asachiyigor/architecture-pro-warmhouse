@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Home Pro - API Documentation</title>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      height: 100vh;
+    }
+    
+    /* Left Sidebar - Yandex style */
+    .sidebar {
+      width: 320px;
+      background: white;
+      border-right: 1px solid #e6e6e6;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid #e6e6e6;
+      background: #fafafa;
+    }
+    
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    
+    .logo-section img {
+      height: 28px;
+      width: auto;
+    }
+    
+    .logo-section h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+    }
+    
+    .subtitle {
+      font-size: 13px;
+      color: #666;
+      margin-top: 5px;
+    }
+    
+    .nav-section {
+      padding: 0;
+    }
+    
+    .nav-title {
+      padding: 15px 20px 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      background: #f9f9f9;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    
+    .nav-item {
+      display: block;
+      padding: 12px 20px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+      border-bottom: 1px solid #f0f0f0;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .nav-item:hover,
+    .nav-item.active {
+      background: #e8f4fd;
+      color: #0070f3;
+      border-left: 3px solid #0070f3;
+    }
+    
+    .nav-item .service-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-item .port {
+      background: #0070f3;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    
+    .nav-item .tech {
+      background: #28a745;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      margin-left: 5px;
+    }
+    
+    .nav-item .expand-arrow {
+      font-size: 10px;
+      color: #999;
+      margin-left: 5px;
+      transition: transform 0.2s ease;
+    }
+    
+    .nav-item.expanded .expand-arrow {
+      transform: rotate(90deg);
+    }
+    
+    .nav-submethods {
+      display: none;
+      background: #f8f9fa;
+      border-top: 1px solid #e6e6e6;
+    }
+    
+    .nav-submethods.expanded {
+      display: block;
+    }
+    
+    .nav-submethod {
+      display: block;
+      padding: 8px 15px 8px 40px;
+      text-decoration: none;
+      color: #555;
+      font-size: 12px;
+      border-bottom: 1px solid #f0f0f0;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .nav-submethod:hover,
+    .nav-submethod.active {
+      background: #e8f4fd;
+      color: #0070f3;
+    }
+    
+    .nav-submethod .method-badge {
+      display: inline-block;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 600;
+      color: white;
+      margin-right: 6px;
+      min-width: 35px;
+      text-align: center;
+    }
+    
+    .nav-submethod .method-badge.get { background: #28a745; }
+    .nav-submethod .method-badge.post { background: #007bff; }
+    .nav-submethod .method-badge.put { background: #ffc107; color: #333; }
+    .nav-submethod .method-badge.delete { background: #dc3545; }
+    .nav-submethod .method-badge.patch { background: #17a2b8; }
+    
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .content-header {
+      background: white;
+      padding: 20px 30px;
+      border-bottom: 1px solid #e6e6e6;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .content-header h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .content-header p {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .swagger-container {
+      flex: 1;
+      overflow-y: auto;
+      background: white;
+    }
+    
+    #swagger-ui {
+      padding: 0;
+    }
+    
+    /* Swagger UI Customization */
+    .swagger-ui .topbar {
+      display: none;
+    }
+    
+    .swagger-ui .info {
+      padding: 30px;
+    }
+    
+    .swagger-ui .info .title {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .swagger-ui .info .description {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    .swagger-ui .scheme-container {
+      background: #f8f9fa;
+      padding: 20px 30px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    
+    /* Architecture Overview Box */
+    .architecture-overview {
+      background: #f8f9fa;
+      border: 1px solid #e6e6e6;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 20px 30px;
+    }
+    
+    .architecture-overview h3 {
+      color: #333;
+      font-size: 16px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .architecture-overview ul {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .architecture-overview li {
+      padding: 8px 0;
+      font-size: 14px;
+      color: #555;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    
+    .architecture-overview li:last-child {
+      border-bottom: none;
+    }
+    
+    .architecture-overview strong {
+      color: #0070f3;
+      font-weight: 600;
+    }
+    
+    /* API Methods Styling */
+    .api-methods {
+      margin: 20px 30px;
+    }
+    
+    .method-group {
+      margin-bottom: 30px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      background: white;
+    }
+    
+    .method-group-header {
+      background: #f8f9fa;
+      padding: 15px 20px;
+      border-bottom: 1px solid #e6e6e6;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .method-group-header:hover {
+      background: #e9ecef;
+    }
+    
+    .method-group-header .expand-icon {
+      transform: rotate(0deg);
+      transition: transform 0.2s ease;
+    }
+    
+    .method-group-header.expanded .expand-icon {
+      transform: rotate(90deg);
+    }
+    
+    .method-list {
+      display: none;
+    }
+    
+    .method-list.expanded {
+      display: block;
+    }
+    
+    .method-item {
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .method-item:last-child {
+      border-bottom: none;
+    }
+    
+    .method-header {
+      padding: 15px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.2s ease;
+    }
+    
+    .method-header:hover {
+      background: #f8f9fa;
+    }
+    
+    .method-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .http-method {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      min-width: 60px;
+      text-align: center;
+    }
+    
+    .http-method.get { background: #28a745; }
+    .http-method.post { background: #007bff; }
+    .http-method.put { background: #ffc107; color: #333; }
+    .http-method.delete { background: #dc3545; }
+    .http-method.patch { background: #17a2b8; }
+    
+    .method-path {
+      font-family: 'Monaco', 'Menlo', monospace;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .method-description {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .method-details {
+      display: none;
+      background: #fafafa;
+      border-top: 1px solid #e6e6e6;
+    }
+    
+    .method-details.expanded {
+      display: block;
+    }
+    
+    .details-content {
+      padding: 20px;
+    }
+    
+    .detail-section {
+      margin-bottom: 25px;
+    }
+    
+    .detail-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .detail-title {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    
+    .code-block {
+      background: #f8f9fa;
+      border: 1px solid #e6e6e6;
+      border-radius: 4px;
+      padding: 15px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
+    
+    .status-codes {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .status-code {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    
+    .status-code.success { background: #d4edda; border-left: 4px solid #28a745; }
+    .status-code.client-error { background: #f8d7da; border-left: 4px solid #dc3545; }
+    .status-code.server-error { background: #f8d7da; border-left: 4px solid #dc3545; }
+    
+    .status-code-number {
+      font-weight: 600;
+      min-width: 30px;
+    }
+    
+    .expand-arrow {
+      font-size: 12px;
+      color: #666;
+      transform: rotate(0deg);
+      transition: transform 0.2s ease;
+    }
+    
+    .method-header.expanded .expand-arrow {
+      transform: rotate(90deg);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 250px;
+      }
+      
+      .content-header {
+        padding: 15px 20px;
+      }
+      
+      .architecture-overview {
+        margin: 15px 20px;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Left Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <img src="./new_logo.svg" alt="Logo"/>
+      </div>
+      <div class="subtitle">API Documentation</div>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-title">Methods</div>
+      
+      <div class="nav-item active" onclick="showService('overview')">
+        <div class="service-info">
+          <span>📊 Overview</span>
+        </div>
+      </div>
+      
+      <div class="nav-item" onclick="toggleNavService('api-gateway')">
+        <div class="service-info">
+          <span>🌐 API Gateway</span>
+          <div>
+            <span class="port">:8000</span>
+            <span class="tech">Go</span>
+            <span class="expand-arrow">▶</span>
+          </div>
+        </div>
+      </div>
+      <div class="nav-submethods" id="nav-api-gateway">
+        <div class="nav-submethod" onclick="showServiceMethod('api-gateway', 0)">
+          <span class="method-badge get">GET</span>/health
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('api-gateway', 1)">
+          <span class="method-badge get">GET</span>/api/v1/users/*
+        </div>
+      </div>
+      
+      <div class="nav-item" onclick="toggleNavService('temperature-api')">
+        <div class="service-info">
+          <span>🌡️ Temperature API</span>
+          <div>
+            <span class="port">:8081</span>
+            <span class="tech">Go</span>
+            <span class="expand-arrow">▶</span>
+          </div>
+        </div>
+      </div>
+      <div class="nav-submethods" id="nav-temperature-api">
+        <div class="nav-submethod" onclick="showServiceMethod('temperature-api', 0)">
+          <span class="method-badge get">GET</span>/health
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('temperature-api', 1)">
+          <span class="method-badge get">GET</span>/temperature
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('temperature-api', 2)">
+          <span class="method-badge get">GET</span>/temperature/{id}
+        </div>
+      </div>
+      
+      <div class="nav-item" onclick="toggleNavService('device-service')">
+        <div class="service-info">
+          <span>🔧 Device Service</span>
+          <div>
+            <span class="port">:8082</span>
+            <span class="tech">Java</span>
+            <span class="expand-arrow">▶</span>
+          </div>
+        </div>
+      </div>
+      <div class="nav-submethods" id="nav-device-service">
+        <div class="nav-submethod" onclick="showServiceMethod('device-service', 0)">
+          <span class="method-badge get">GET</span>/api/v1/devices
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('device-service', 1)">
+          <span class="method-badge post">POST</span>/api/v1/devices
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('device-service', 2)">
+          <span class="method-badge get">GET</span>/api/v1/devices/{id}
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('device-service', 3)">
+          <span class="method-badge put">PUT</span>/api/v1/devices/{id}
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('device-service', 4)">
+          <span class="method-badge delete">DEL</span>/api/v1/devices/{id}
+        </div>
+      </div>
+      
+      <div class="nav-item" onclick="toggleNavService('telemetry-service')">
+        <div class="service-info">
+          <span>📊 Telemetry Service</span>
+          <div>
+            <span class="port">:8083</span>
+            <span class="tech">Python</span>
+            <span class="expand-arrow">▶</span>
+          </div>
+        </div>
+      </div>
+      <div class="nav-submethods" id="nav-telemetry-service">
+        <div class="nav-submethod" onclick="showServiceMethod('telemetry-service', 0)">
+          <span class="method-badge get">GET</span>/telemetry/readings
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('telemetry-service', 1)">
+          <span class="method-badge post">POST</span>/telemetry/readings
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('telemetry-service', 2)">
+          <span class="method-badge get">GET</span>/telemetry/readings/{id}
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('telemetry-service', 3)">
+          <span class="method-badge get">GET</span>/telemetry/latest/{id}
+        </div>
+      </div>
+      
+      <div class="nav-item" onclick="toggleNavService('user-service')">
+        <div class="service-info">
+          <span>👤 User Service</span>
+          <div>
+            <span class="port">:8084</span>
+            <span class="tech">Go</span>
+            <span class="expand-arrow">▶</span>
+          </div>
+        </div>
+      </div>
+      <div class="nav-submethods" id="nav-user-service">
+        <div class="nav-submethod" onclick="showServiceMethod('user-service', 0)">
+          <span class="method-badge get">GET</span>/api/v1/users
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('user-service', 1)">
+          <span class="method-badge post">POST</span>/api/v1/users
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('user-service', 2)">
+          <span class="method-badge put">PUT</span>/api/v1/users/{id}
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('user-service', 3)">
+          <span class="method-badge delete">DEL</span>/api/v1/users/{id}
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('user-service', 4)">
+          <span class="method-badge get">GET</span>/users/{id}/households
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('user-service', 5)">
+          <span class="method-badge post">POST</span>/users/{id}/households
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('user-service', 6)">
+          <span class="method-badge put">PUT</span>/households/{id}
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('user-service', 7)">
+          <span class="method-badge delete">DEL</span>/households/{id}
+        </div>
+      </div>
+      
+      <div class="nav-item" onclick="toggleNavService('billing-service')">
+        <div class="service-info">
+          <span>💳 Billing Service</span>
+          <div>
+            <span class="port">:8085</span>
+            <span class="tech">Go</span>
+            <span class="expand-arrow">▶</span>
+          </div>
+        </div>
+      </div>
+      <div class="nav-submethods" id="nav-billing-service">
+        <div class="nav-submethod" onclick="showServiceMethod('billing-service', 0)">
+          <span class="method-badge get">GET</span>/api/v1/plans
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('billing-service', 1)">
+          <span class="method-badge get">GET</span>/api/v1/subscriptions
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('billing-service', 2)">
+          <span class="method-badge post">POST</span>/api/v1/subscriptions
+        </div>
+      </div>
+      
+      <div class="nav-item" onclick="toggleNavService('automation-service')">
+        <div class="service-info">
+          <span>🔄 Automation Service</span>
+          <div>
+            <span class="port">:8087</span>
+            <span class="tech">Go</span>
+            <span class="expand-arrow">▶</span>
+          </div>
+        </div>
+      </div>
+      <div class="nav-submethods" id="nav-automation-service">
+        <div class="nav-submethod" onclick="showServiceMethod('automation-service', 0)">
+          <span class="method-badge get">GET</span>/api/v1/scenarios
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('automation-service', 1)">
+          <span class="method-badge post">POST</span>/api/v1/scenarios
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('automation-service', 2)">
+          <span class="method-badge put">PUT</span>/api/v1/scenarios/{id}
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('automation-service', 3)">
+          <span class="method-badge delete">DEL</span>/api/v1/scenarios/{id}
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('automation-service', 4)">
+          <span class="method-badge post">POST</span>/scenarios/{id}/execute
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('automation-service', 5)">
+          <span class="method-badge get">GET</span>/api/v1/stats
+        </div>
+      </div>
+      
+      <div class="nav-item" onclick="toggleNavService('notification-service')">
+        <div class="service-info">
+          <span>📱 Notification Service</span>
+          <div>
+            <span class="port">:8088</span>
+            <span class="tech">Node.js</span>
+            <span class="expand-arrow">▶</span>
+          </div>
+        </div>
+      </div>
+      <div class="nav-submethods" id="nav-notification-service">
+        <div class="nav-submethod" onclick="showServiceMethod('notification-service', 0)">
+          <span class="method-badge get">GET</span>/health
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('notification-service', 1)">
+          <span class="method-badge post">POST</span>/api/v1/notifications
+        </div>
+      </div>
+      
+      <div class="nav-item" onclick="toggleNavService('smart-home-app')">
+        <div class="service-info">
+          <span>🏠 Smart Home App</span>
+          <div>
+            <span class="port">:8080</span>
+            <span class="tech">Go</span>
+            <span class="expand-arrow">▶</span>
+          </div>
+        </div>
+      </div>
+      <div class="nav-submethods" id="nav-smart-home-app">
+        <div class="nav-submethod" onclick="showServiceMethod('smart-home-app', 0)">
+          <span class="method-badge get">GET</span>/health
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('smart-home-app', 1)">
+          <span class="method-badge get">GET</span>/api/v1/sensors
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('smart-home-app', 2)">
+          <span class="method-badge post">POST</span>/api/v1/sensors
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('smart-home-app', 3)">
+          <span class="method-badge get">GET</span>/api/v1/sensors/{id}
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('smart-home-app', 4)">
+          <span class="method-badge put">PUT</span>/api/v1/sensors/{id}
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('smart-home-app', 5)">
+          <span class="method-badge delete">DEL</span>/api/v1/sensors/{id}
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('smart-home-app', 6)">
+          <span class="method-badge patch">PATCH</span>/sensors/{id}/value
+        </div>
+        <div class="nav-submethod" onclick="showServiceMethod('smart-home-app', 7)">
+          <span class="method-badge get">GET</span>/sensors/temp/{location}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="content-header">
+      <h2 id="service-title">Smart Home Pro API</h2>
+      <p id="service-description">Unified microservices architecture documentation</p>
+    </div>
+    
+    <div class="swagger-container">
+      <div id="overview-content">
+        <div class="architecture-overview">
+          <h3>🏗️ Architecture Overview</h3>
+          <ul>
+            <li><strong>9 Microservices</strong> with full OpenAPI documentation</li>
+            <li><strong>4 Technologies:</strong> Go, Java Spring Boot, Python FastAPI, Node.js</li>
+            <li><strong>Event-Driven Architecture</strong> with Apache Kafka</li>
+            <li><strong>Database-per-Service</strong> pattern (PostgreSQL + InfluxDB + Redis)</li>
+            <li><strong>API Gateway</strong> as single entry point</li>
+            <li><strong>Real-time capabilities</strong> via WebSocket (Socket.IO)</li>
+            <li><strong>Docker containerization</strong> with docker-compose orchestration</li>
+            <li><strong>Production-ready</strong> monitoring and health checks</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div id="swagger-ui" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+  <script>
+    let swaggerUI;
+    
+    // Service information with detailed API contracts
+    const services = {
+      'overview': {
+        title: 'Smart Home App',
+        description: 'Unified microservices architecture documentation',
+        showOverview: true
+      },
+      'api-gateway': {
+        title: 'API Gateway',
+        description: 'Central entry point for all API requests (Go/Gin :8000)',
+        methods: [
+          {
+            method: 'GET',
+            path: '/health',
+            description: 'Check API Gateway health status',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Service is healthy',
+                example: `{
+  "status": "ok",
+  "service": "api-gateway",
+  "timestamp": 1735896000
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Service is healthy' }
+            ]
+          },
+          {
+            method: 'GET',
+            path: '/api/v1/users/*',
+            description: 'Proxy requests to User Service',
+            requestBody: null,
+            responses: {
+              '200': { description: 'Proxied response from User Service' },
+              '404': { description: 'User Service not available' },
+              '500': { description: 'Gateway routing error' }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Request proxied successfully' },
+              { code: '404', type: 'client-error', description: 'Target service not found' },
+              { code: '500', type: 'server-error', description: 'Gateway internal error' }
+            ]
+          }
+        ]
+      },
+      'temperature-api': {
+        title: 'Temperature API',
+        description: 'IoT temperature sensors emulation (Go/Gin :8081)',
+        methods: [
+          {
+            method: 'GET',
+            path: '/health',
+            description: 'Check Temperature API health',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Service is healthy',
+                example: `{
+  "status": "ok",
+  "service": "temperature-api",
+  "timestamp": 1735896000
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Service is healthy' }
+            ]
+          },
+          {
+            method: 'GET',
+            path: '/temperature',
+            description: 'Get temperature by location query parameter',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Temperature data retrieved successfully',
+                example: `{
+  "value": 23.45,
+  "unit": "°C",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "location": "Living Room",
+  "status": "active",
+  "sensor_id": "1",
+  "sensor_type": "temperature",
+  "description": "Temperature sensor in Living Room"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Temperature retrieved successfully' },
+              { code: '404', type: 'client-error', description: 'Location not found' },
+              { code: '500', type: 'server-error', description: 'Sensor communication error' }
+            ]
+          },
+          {
+            method: 'GET',
+            path: '/temperature/{sensor_id}',
+            description: 'Get temperature by sensor ID',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Temperature data by sensor ID',
+                example: `{
+  "value": 22.8,
+  "unit": "°C",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "location": "Kitchen",
+  "status": "active",
+  "sensor_id": "3",
+  "sensor_type": "temperature"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Temperature retrieved successfully' },
+              { code: '404', type: 'client-error', description: 'Sensor not found' },
+              { code: '500', type: 'server-error', description: 'Sensor communication error' }
+            ]
+          }
+        ]
+      },
+      'device-service': {
+        title: 'Device Service',
+        description: 'IoT devices management and monitoring (Java/Spring :8082)',
+        methods: [
+          {
+            method: 'GET',
+            path: '/api/v1/devices',
+            description: 'Get all devices',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'List of all devices',
+                example: `[
+  {
+    "id": 1,
+    "name": "Kitchen Temperature Sensor",
+    "type": "TEMPERATURE_SENSOR",
+    "location": "Kitchen",
+    "status": "ONLINE",
+    "macAddress": "aa:bb:cc:dd:ee:ff",
+    "ipAddress": "192.168.1.100",
+    "firmwareVersion": "1.2.3",
+    "userId": 1,
+    "createdAt": "2025-01-03T10:00:00Z",
+    "updatedAt": "2025-01-03T10:00:00Z",
+    "lastSeen": "2025-01-03T10:30:00Z"
+  }
+]`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Devices retrieved successfully' },
+              { code: '500', type: 'server-error', description: 'Database connection error' }
+            ]
+          },
+          {
+            method: 'POST',
+            path: '/api/v1/devices',
+            description: 'Create a new device',
+            requestBody: {
+              description: 'Device creation request',
+              example: `{
+  "name": "Living Room Smart Light",
+  "type": "SMART_LIGHT",
+  "location": "Living Room",
+  "macAddress": "ff:ee:dd:cc:bb:aa",
+  "ipAddress": "192.168.1.101",
+  "userId": 1
+}`
+            },
+            responses: {
+              '201': {
+                description: 'Device created successfully',
+                example: `{
+  "id": 2,
+  "name": "Living Room Smart Light",
+  "type": "SMART_LIGHT",
+  "location": "Living Room",
+  "status": "CONFIGURING",
+  "macAddress": "ff:ee:dd:cc:bb:aa",
+  "ipAddress": "192.168.1.101",
+  "userId": 1,
+  "createdAt": "2025-01-03T11:00:00Z",
+  "updatedAt": "2025-01-03T11:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '201', type: 'success', description: 'Device created successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid device data' },
+              { code: '409', type: 'client-error', description: 'Device with MAC address already exists' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'GET',
+            path: '/api/v1/devices/{id}',
+            description: 'Get device by ID',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Device retrieved successfully',
+                example: `{
+  "id": 1,
+  "name": "Kitchen Temperature Sensor",
+  "type": "TEMPERATURE_SENSOR",
+  "location": "Kitchen",
+  "status": "ONLINE",
+  "macAddress": "aa:bb:cc:dd:ee:ff",
+  "ipAddress": "192.168.1.100",
+  "firmwareVersion": "1.2.3",
+  "userId": 1,
+  "createdAt": "2025-01-03T10:00:00Z",
+  "updatedAt": "2025-01-03T10:00:00Z",
+  "lastSeen": "2025-01-03T10:30:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Device retrieved successfully' },
+              { code: '404', type: 'client-error', description: 'Device not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'PUT',
+            path: '/api/v1/devices/{id}',
+            description: 'Update existing device',
+            requestBody: {
+              description: 'Device update data',
+              example: `{
+  "name": "Updated Kitchen Sensor",
+  "location": "Kitchen Updated",
+  "status": "OFFLINE"
+}`
+            },
+            responses: {
+              '200': {
+                description: 'Device updated successfully',
+                example: `{
+  "id": 1,
+  "name": "Updated Kitchen Sensor",
+  "type": "TEMPERATURE_SENSOR",
+  "location": "Kitchen Updated",
+  "status": "OFFLINE",
+  "macAddress": "aa:bb:cc:dd:ee:ff",
+  "ipAddress": "192.168.1.100",
+  "firmwareVersion": "1.2.3",
+  "userId": 1,
+  "createdAt": "2025-01-03T10:00:00Z",
+  "updatedAt": "2025-01-03T14:00:00Z",
+  "lastSeen": "2025-01-03T10:30:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Device updated successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid device data' },
+              { code: '404', type: 'client-error', description: 'Device not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'DELETE',
+            path: '/api/v1/devices/{id}',
+            description: 'Delete device',
+            requestBody: null,
+            responses: {
+              '204': {
+                description: 'Device deleted successfully'
+              }
+            },
+            statusCodes: [
+              { code: '204', type: 'success', description: 'Device deleted successfully' },
+              { code: '404', type: 'client-error', description: 'Device not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          }
+        ]
+      },
+      'telemetry-service': {
+        title: 'Telemetry Service',
+        description: 'Real-time telemetry data collection (Python/FastAPI :8083)',
+        methods: [
+          {
+            method: 'GET',
+            path: '/telemetry/readings',
+            description: 'Get all telemetry readings',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'List of telemetry readings',
+                example: `[
+  {
+    "id": 1,
+    "device_id": "temp_sensor_001",
+    "device_type": "TEMPERATURE_SENSOR",
+    "location": "Kitchen",
+    "metric_name": "temperature",
+    "value": 23.5,
+    "unit": "°C",
+    "timestamp": "2025-01-03T10:30:00Z",
+    "created_at": "2025-01-03T10:30:00Z"
+  }
+]`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Readings retrieved successfully' },
+              { code: '500', type: 'server-error', description: 'Database connection error' }
+            ]
+          },
+          {
+            method: 'POST',
+            path: '/telemetry/readings',
+            description: 'Create new telemetry reading',
+            requestBody: {
+              description: 'Telemetry reading data',
+              example: `{
+  "device_id": "temp_sensor_002",
+  "device_type": "TEMPERATURE_SENSOR",
+  "location": "Bedroom",
+  "metric_name": "temperature",
+  "value": 21.5,
+  "unit": "°C"
+}`
+            },
+            responses: {
+              '201': {
+                description: 'Reading created successfully',
+                example: `{
+  "id": 2,
+  "device_id": "temp_sensor_002",
+  "device_type": "TEMPERATURE_SENSOR",
+  "location": "Bedroom",
+  "metric_name": "temperature",
+  "value": 21.5,
+  "unit": "°C",
+  "timestamp": "2025-01-03T11:00:00Z",
+  "created_at": "2025-01-03T11:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '201', type: 'success', description: 'Reading created successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid telemetry data' },
+              { code: '500', type: 'server-error', description: 'Database or InfluxDB error' }
+            ]
+          },
+          {
+            method: 'GET',
+            path: '/telemetry/readings/{device_id}',
+            description: 'Get telemetry readings for specific device',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Device telemetry readings',
+                example: `[
+  {
+    "id": 1,
+    "device_id": "temp_sensor_001",
+    "device_type": "TEMPERATURE_SENSOR",
+    "location": "Kitchen",
+    "metric_name": "temperature",
+    "value": 23.5,
+    "unit": "°C",
+    "timestamp": "2025-01-03T10:30:00Z",
+    "created_at": "2025-01-03T10:30:00Z"
+  }
+]`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Device readings retrieved successfully' },
+              { code: '404', type: 'client-error', description: 'Device not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'GET',
+            path: '/telemetry/latest/{device_id}',
+            description: 'Get latest telemetry reading for device',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Latest device reading',
+                example: `{
+  "id": 5,
+  "device_id": "temp_sensor_001",
+  "device_type": "TEMPERATURE_SENSOR",
+  "location": "Kitchen",
+  "metric_name": "temperature",
+  "value": 24.2,
+  "unit": "°C",
+  "timestamp": "2025-01-03T15:30:00Z",
+  "created_at": "2025-01-03T15:30:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Latest reading retrieved successfully' },
+              { code: '404', type: 'client-error', description: 'Device not found or no readings' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          }
+        ]
+      },
+      'user-service': {
+        title: 'User Service',
+        description: 'User management and authentication (Go/Gin :8084)',
+        methods: [
+          {
+            method: 'GET',
+            path: '/api/v1/users',
+            description: 'Get all users',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'List of users',
+                example: `[
+  {
+    "id": "uuid-1",
+    "email": "john.doe@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "is_active": true,
+    "created_at": "2025-01-03T10:00:00Z",
+    "updated_at": "2025-01-03T10:00:00Z"
+  }
+]`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Users retrieved successfully' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'POST',
+            path: '/api/v1/users',
+            description: 'Create new user',
+            requestBody: {
+              description: 'User creation data',
+              example: `{
+  "email": "jane.smith@example.com",
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "password": "secure_password_123"
+}`
+            },
+            responses: {
+              '201': {
+                description: 'User created successfully',
+                example: `{
+  "id": "uuid-2",
+  "email": "jane.smith@example.com",
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "is_active": true,
+  "created_at": "2025-01-03T11:00:00Z",
+  "updated_at": "2025-01-03T11:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '201', type: 'success', description: 'User created successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid user data' },
+              { code: '409', type: 'client-error', description: 'Email already exists' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'PUT',
+            path: '/api/v1/users/{id}',
+            description: 'Update existing user',
+            requestBody: {
+              description: 'User update data',
+              example: `{
+  "first_name": "John Updated",
+  "last_name": "Doe Updated",
+  "is_active": false
+}`
+            },
+            responses: {
+              '200': {
+                description: 'User updated successfully',
+                example: `{
+  "id": "uuid-1",
+  "email": "john.doe@example.com",
+  "first_name": "John Updated",
+  "last_name": "Doe Updated",
+  "is_active": false,
+  "created_at": "2025-01-03T10:00:00Z",
+  "updated_at": "2025-01-03T12:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'User updated successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid user data' },
+              { code: '404', type: 'client-error', description: 'User not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'DELETE',
+            path: '/api/v1/users/{id}',
+            description: 'Delete user',
+            requestBody: null,
+            responses: {
+              '204': {
+                description: 'User deleted successfully'
+              }
+            },
+            statusCodes: [
+              { code: '204', type: 'success', description: 'User deleted successfully' },
+              { code: '404', type: 'client-error', description: 'User not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'GET',
+            path: '/api/v1/users/{user_id}/households',
+            description: 'Get user households',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'List of user households',
+                example: `[
+  {
+    "id": "house-uuid-1",
+    "name": "Main House",
+    "address": "123 Main St",
+    "user_id": "user-uuid-1",
+    "created_at": "2025-01-03T10:00:00Z"
+  }
+]`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Households retrieved successfully' },
+              { code: '404', type: 'client-error', description: 'User not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'POST',
+            path: '/api/v1/users/{user_id}/households',
+            description: 'Create new household for user',
+            requestBody: {
+              description: 'Household creation data',
+              example: `{
+  "name": "Summer House",
+  "address": "456 Beach Ave"
+}`
+            },
+            responses: {
+              '201': {
+                description: 'Household created successfully',
+                example: `{
+  "id": "house-uuid-2",
+  "name": "Summer House",
+  "address": "456 Beach Ave",
+  "user_id": "user-uuid-1",
+  "created_at": "2025-01-03T12:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '201', type: 'success', description: 'Household created successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid household data' },
+              { code: '404', type: 'client-error', description: 'User not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'PUT',
+            path: '/api/v1/households/{id}',
+            description: 'Update household',
+            requestBody: {
+              description: 'Household update data',
+              example: `{
+  "name": "Updated House Name",
+  "address": "789 New St"
+}`
+            },
+            responses: {
+              '200': {
+                description: 'Household updated successfully',
+                example: `{
+  "id": "house-uuid-1",
+  "name": "Updated House Name",
+  "address": "789 New St",
+  "user_id": "user-uuid-1",
+  "updated_at": "2025-01-03T13:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Household updated successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid household data' },
+              { code: '404', type: 'client-error', description: 'Household not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'DELETE',
+            path: '/api/v1/households/{id}',
+            description: 'Delete household',
+            requestBody: null,
+            responses: {
+              '204': {
+                description: 'Household deleted successfully'
+              }
+            },
+            statusCodes: [
+              { code: '204', type: 'success', description: 'Household deleted successfully' },
+              { code: '404', type: 'client-error', description: 'Household not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          }
+        ]
+      },
+      'billing-service': {
+        title: 'Billing Service',
+        description: 'Pricing plans and payment processing (Go/Gin :8085)',
+        methods: [
+          {
+            method: 'GET',
+            path: '/api/v1/plans',
+            description: 'Get all pricing plans',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'List of pricing plans',
+                example: `[
+  {
+    "id": "plan-basic",
+    "name": "Basic Plan",
+    "price": 9.99,
+    "currency": "USD",
+    "features": ["5 devices", "Basic support"],
+    "active": true
+  }
+]`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Plans retrieved successfully' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'GET',
+            path: '/api/v1/subscriptions',
+            description: 'Get user subscriptions',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'User subscriptions',
+                example: `[
+  {
+    "id": "sub-123",
+    "user_id": "user-456",
+    "plan_id": "plan-basic",
+    "status": "active",
+    "created_at": "2025-01-03T10:00:00Z",
+    "expires_at": "2025-02-03T10:00:00Z"
+  }
+]`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Subscriptions retrieved successfully' },
+              { code: '404', type: 'client-error', description: 'User not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'POST',
+            path: '/api/v1/subscriptions',
+            description: 'Create new subscription',
+            requestBody: {
+              description: 'Subscription creation data',
+              example: `{
+  "user_id": "user-456",
+  "plan_id": "plan-basic",
+  "payment_method": "credit_card"
+}`
+            },
+            responses: {
+              '201': {
+                description: 'Subscription created successfully',
+                example: `{
+  "id": "sub-789",
+  "user_id": "user-456",
+  "plan_id": "plan-basic",
+  "status": "active",
+  "created_at": "2025-01-03T11:00:00Z",
+  "expires_at": "2025-02-03T11:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '201', type: 'success', description: 'Subscription created successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid subscription data' },
+              { code: '402', type: 'client-error', description: 'Payment required' },
+              { code: '500', type: 'server-error', description: 'Payment processing error' }
+            ]
+          }
+        ]
+      },
+      'automation-service': {
+        title: 'Automation Service',
+        description: 'Smart home automation scenarios (Go/Gin :8087)',
+        methods: [
+          {
+            method: 'GET',
+            path: '/api/v1/scenarios',
+            description: 'Get all automation scenarios',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'List of automation scenarios',
+                example: `[
+  {
+    "id": "scenario-123",
+    "household_id": "house-456",
+    "name": "Evening Scene",
+    "description": "Turn off lights and lock doors",
+    "is_active": true,
+    "created_at": "2025-01-03T10:00:00Z"
+  }
+]`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Scenarios retrieved successfully' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'POST',
+            path: '/api/v1/scenarios',
+            description: 'Create new automation scenario',
+            requestBody: {
+              description: 'Scenario creation data',
+              example: `{
+  "household_id": "house-456",
+  "name": "Morning Scene",
+  "description": "Turn on lights and start coffee",
+  "actions": [
+    {
+      "device_id": "light-001",
+      "action_type": "turn_on",
+      "parameters": {"brightness": 80}
+    }
+  ]
+}`
+            },
+            responses: {
+              '201': {
+                description: 'Scenario created successfully',
+                example: `{
+  "id": "scenario-789",
+  "household_id": "house-456",
+  "name": "Morning Scene",
+  "description": "Turn on lights and start coffee",
+  "is_active": true,
+  "created_at": "2025-01-03T11:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '201', type: 'success', description: 'Scenario created successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid scenario data' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'PUT',
+            path: '/api/v1/scenarios/{id}',
+            description: 'Update automation scenario',
+            requestBody: {
+              description: 'Scenario update data',
+              example: `{
+  "name": "Updated Evening Scene",
+  "description": "Turn off lights, lock doors, and set alarm",
+  "is_active": false,
+  "actions": [
+    {
+      "device_id": "light-001",
+      "action_type": "turn_off"
+    },
+    {
+      "device_id": "alarm-001", 
+      "action_type": "activate"
+    }
+  ]
+}`
+            },
+            responses: {
+              '200': {
+                description: 'Scenario updated successfully',
+                example: `{
+  "id": "scenario-123",
+  "household_id": "house-456",
+  "name": "Updated Evening Scene",
+  "description": "Turn off lights, lock doors, and set alarm",
+  "is_active": false,
+  "updated_at": "2025-01-03T16:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Scenario updated successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid scenario data' },
+              { code: '404', type: 'client-error', description: 'Scenario not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'DELETE',
+            path: '/api/v1/scenarios/{id}',
+            description: 'Delete automation scenario',
+            requestBody: null,
+            responses: {
+              '204': {
+                description: 'Scenario deleted successfully'
+              }
+            },
+            statusCodes: [
+              { code: '204', type: 'success', description: 'Scenario deleted successfully' },
+              { code: '404', type: 'client-error', description: 'Scenario not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'POST',
+            path: '/api/v1/scenarios/{id}/execute',
+            description: 'Execute automation scenario',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Scenario executed successfully',
+                example: `{
+  "scenario_id": "scenario-123",
+  "execution_id": "exec-456",
+  "status": "completed",
+  "actions_executed": 3,
+  "execution_time": "2025-01-03T17:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Scenario executed successfully' },
+              { code: '400', type: 'client-error', description: 'Scenario is inactive' },
+              { code: '404', type: 'client-error', description: 'Scenario not found' },
+              { code: '500', type: 'server-error', description: 'Execution error' }
+            ]
+          },
+          {
+            method: 'GET',
+            path: '/api/v1/stats',
+            description: 'Get automation statistics',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Automation statistics',
+                example: `{
+  "total_scenarios": 15,
+  "active_scenarios": 12,
+  "executions_today": 45,
+  "most_used_scenario": "Evening Scene"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Statistics retrieved successfully' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          }
+        ]
+      },
+      'notification-service': {
+        title: 'Notification Service',
+        description: 'Real-time notifications via WebSocket (Node.js/Express :8088)',
+        methods: [
+          {
+            method: 'GET',
+            path: '/health',
+            description: 'Check notification service health',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Service is healthy',
+                example: `{
+  "status": "healthy",
+  "service": "notification-service",
+  "uptime": 3600,
+  "connections": 15
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Service is healthy' }
+            ]
+          },
+          {
+            method: 'POST',
+            path: '/api/v1/notifications',
+            description: 'Send notification to user',
+            requestBody: {
+              description: 'Notification data',
+              example: `{
+  "user_id": "uuid-1",
+  "type": "device_alert",
+  "title": "Device Offline",
+  "message": "Kitchen Temperature Sensor went offline",
+  "priority": "high",
+  "data": {
+    "device_id": "temp_sensor_001",
+    "location": "Kitchen"
+  }
+}`
+            },
+            responses: {
+              '201': {
+                description: 'Notification sent successfully',
+                example: `{
+  "id": "notif-uuid-1",
+  "user_id": "uuid-1",
+  "type": "device_alert",
+  "title": "Device Offline",
+  "message": "Kitchen Temperature Sensor went offline",
+  "priority": "high",
+  "sent": true,
+  "created_at": "2025-01-03T11:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '201', type: 'success', description: 'Notification sent successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid notification data' },
+              { code: '404', type: 'client-error', description: 'User not found' },
+              { code: '500', type: 'server-error', description: 'WebSocket or database error' }
+            ]
+          }
+        ]
+      },
+      'smart-home-app': {
+        title: 'Smart Home App (Legacy)',
+        description: 'Monolithic application with sensor management (Go :8080)',
+        methods: [
+          {
+            method: 'GET',
+            path: '/health',
+            description: 'Check Smart Home App health',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Application is healthy',
+                example: `{
+  "status": "ok",
+  "service": "smart-home-app",
+  "database": "connected",
+  "timestamp": 1735896000
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Application is healthy' },
+              { code: '500', type: 'server-error', description: 'Database connection error' }
+            ]
+          },
+          {
+            method: 'GET',
+            path: '/api/v1/sensors',
+            description: 'Get all sensors',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'List of sensors',
+                example: `[
+  {
+    "id": 1,
+    "name": "Kitchen Temperature Sensor",
+    "type": "temperature",
+    "location": "Kitchen",
+    "value": 23.45,
+    "unit": "°C",
+    "status": "active",
+    "last_updated": "2024-01-15T10:30:00Z",
+    "created_at": "2024-01-15T09:00:00Z"
+  }
+]`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Sensors retrieved successfully' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'POST',
+            path: '/api/v1/sensors',
+            description: 'Create new sensor',
+            requestBody: {
+              description: 'Sensor creation data',
+              example: `{
+  "name": "Living Room Temperature Sensor",
+  "type": "temperature",
+  "location": "Living Room",
+  "unit": "°C"
+}`
+            },
+            responses: {
+              '201': {
+                description: 'Sensor created successfully',
+                example: `{
+  "id": 2,
+  "name": "Living Room Temperature Sensor",
+  "type": "temperature",
+  "location": "Living Room",
+  "value": 0,
+  "unit": "°C",
+  "status": "inactive",
+  "created_at": "2024-01-15T11:00:00Z",
+  "last_updated": "2024-01-15T11:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '201', type: 'success', description: 'Sensor created successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid sensor data' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'GET',
+            path: '/api/v1/sensors/{id}',
+            description: 'Get sensor by ID',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Sensor retrieved successfully',
+                example: `{
+  "id": 1,
+  "name": "Kitchen Temperature Sensor",
+  "type": "temperature",
+  "location": "Kitchen",
+  "value": 23.45,
+  "unit": "°C",
+  "status": "active",
+  "last_updated": "2024-01-15T10:30:00Z",
+  "created_at": "2024-01-15T09:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Sensor retrieved successfully' },
+              { code: '404', type: 'client-error', description: 'Sensor not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'PUT',
+            path: '/api/v1/sensors/{id}',
+            description: 'Update sensor',
+            requestBody: {
+              description: 'Sensor update data',
+              example: `{
+  "name": "Updated Kitchen Sensor",
+  "location": "Kitchen Updated",
+  "status": "maintenance"
+}`
+            },
+            responses: {
+              '200': {
+                description: 'Sensor updated successfully',
+                example: `{
+  "id": 1,
+  "name": "Updated Kitchen Sensor",
+  "type": "temperature",
+  "location": "Kitchen Updated",
+  "value": 23.45,
+  "unit": "°C",
+  "status": "maintenance",
+  "last_updated": "2024-01-15T16:00:00Z",
+  "created_at": "2024-01-15T09:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Sensor updated successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid sensor data' },
+              { code: '404', type: 'client-error', description: 'Sensor not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'DELETE',
+            path: '/api/v1/sensors/{id}',
+            description: 'Delete sensor',
+            requestBody: null,
+            responses: {
+              '204': {
+                description: 'Sensor deleted successfully'
+              }
+            },
+            statusCodes: [
+              { code: '204', type: 'success', description: 'Sensor deleted successfully' },
+              { code: '404', type: 'client-error', description: 'Sensor not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'PATCH',
+            path: '/api/v1/sensors/{id}/value',
+            description: 'Update sensor value only',
+            requestBody: {
+              description: 'Sensor value update',
+              example: `{
+  "value": 25.8
+}`
+            },
+            responses: {
+              '200': {
+                description: 'Sensor value updated successfully',
+                example: `{
+  "id": 1,
+  "name": "Kitchen Temperature Sensor",
+  "type": "temperature",
+  "location": "Kitchen",
+  "value": 25.8,
+  "unit": "°C",
+  "status": "active",
+  "last_updated": "2024-01-15T17:00:00Z"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Sensor value updated successfully' },
+              { code: '400', type: 'client-error', description: 'Invalid value data' },
+              { code: '404', type: 'client-error', description: 'Sensor not found' },
+              { code: '500', type: 'server-error', description: 'Database error' }
+            ]
+          },
+          {
+            method: 'GET',
+            path: '/api/v1/sensors/temperature/{location}',
+            description: 'Get temperature by location',
+            requestBody: null,
+            responses: {
+              '200': {
+                description: 'Temperature data for location',
+                example: `{
+  "location": "Kitchen",
+  "temperature": 23.45,
+  "unit": "°C",
+  "sensor_id": 1,
+  "last_updated": "2024-01-15T10:30:00Z",
+  "status": "active"
+}`
+              }
+            },
+            statusCodes: [
+              { code: '200', type: 'success', description: 'Temperature retrieved successfully' },
+              { code: '404', type: 'client-error', description: 'Location not found' },
+              { code: '500', type: 'server-error', description: 'Temperature API error' }
+            ]
+          }
+        ]
+      }
+    };
+
+    function showService(serviceKey) {
+      // Update active nav item
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.target.closest('.nav-item').classList.add('active');
+      
+      const service = services[serviceKey];
+      if (!service) return;
+      
+      // Update header
+      document.getElementById('service-title').textContent = service.title;
+      document.getElementById('service-description').textContent = service.description;
+      
+      // Show/hide content
+      const overviewContent = document.getElementById('overview-content');
+      const swaggerUIContainer = document.getElementById('swagger-ui');
+      
+      if (service.showOverview) {
+        overviewContent.style.display = 'block';
+        swaggerUIContainer.style.display = 'none';
+        showOverviewContent();
+      } else if (service.methods) {
+        // Show detailed API methods
+        overviewContent.style.display = 'block';
+        swaggerUIContainer.style.display = 'none';
+        showServiceMethods(service);
+      } else {
+        // Load Swagger UI for integrated services
+        overviewContent.style.display = 'none';
+        swaggerUIContainer.style.display = 'block';
+        loadSwaggerUI(service.url);
+      }
+    }
+    
+    function showOverviewContent() {
+      const overviewContent = document.getElementById('overview-content');
+      overviewContent.innerHTML = `
+        <div class="architecture-overview">
+          <h3>🏗️ Architecture Overview</h3>
+          <ul>
+            <li><strong>9 Microservices</strong> with full OpenAPI documentation</li>
+            <li><strong>4 Technologies:</strong> Go, Java Spring Boot, Python FastAPI, Node.js</li>
+            <li><strong>Event-Driven Architecture</strong> with Apache Kafka</li>
+            <li><strong>Database-per-Service</strong> pattern (PostgreSQL + InfluxDB + Redis)</li>
+            <li><strong>API Gateway</strong> as single entry point</li>
+            <li><strong>Real-time capabilities</strong> via WebSocket (Socket.IO)</li>
+            <li><strong>Docker containerization</strong> with docker-compose orchestration</li>
+            <li><strong>Production-ready</strong> monitoring and health checks</li>
+          </ul>
+        </div>
+      `;
+    }
+    
+    function showServiceMethods(service) {
+      const overviewContent = document.getElementById('overview-content');
+      
+      let methodsHTML = '<div class="api-methods">';
+      
+      // Group methods by functionality
+      const healthMethods = service.methods.filter(m => m.path.includes('/health'));
+      const apiMethods = service.methods.filter(m => !m.path.includes('/health'));
+      
+      if (healthMethods.length > 0) {
+        methodsHTML += createMethodGroup('Health Check', healthMethods);
+      }
+      
+      if (apiMethods.length > 0) {
+        methodsHTML += createMethodGroup('API Methods', apiMethods);
+      }
+      
+      methodsHTML += '</div>';
+      overviewContent.innerHTML = methodsHTML;
+      
+      // Add event listeners for expandable sections
+      addMethodEventListeners();
+    }
+    
+    function createMethodGroup(groupName, methods) {
+      const groupId = groupName.toLowerCase().replace(/\\s+/g, '-');
+      
+      let html = `
+        <div class="method-group">
+          <div class="method-group-header" onclick="toggleMethodGroup('${groupId}')">
+            <span>${groupName}</span>
+            <span class="expand-icon">▶</span>
+          </div>
+          <div class="method-list" id="${groupId}">
+      `;
+      
+      methods.forEach((method, index) => {
+        const methodId = `${groupId}-method-${index}`;
+        html += createMethodItem(method, methodId);
+      });
+      
+      html += `
+          </div>
+        </div>
+      `;
+      
+      return html;
+    }
+    
+    function createMethodItem(method, methodId) {
+      return `
+        <div class="method-item">
+          <div class="method-header" onclick="toggleMethodDetails('${methodId}')">
+            <div class="method-info">
+              <span class="http-method ${method.method.toLowerCase()}">${method.method}</span>
+              <span class="method-path">${method.path}</span>
+              <span class="method-description">${method.description}</span>
+            </div>
+            <span class="expand-arrow">▶</span>
+          </div>
+          <div class="method-details" id="${methodId}">
+            <div class="details-content">
+              ${createMethodDetails(method)}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    function createMethodDetails(method) {
+      let html = '';
+      
+      // Request Body
+      if (method.requestBody) {
+        html += `
+          <div class="detail-section">
+            <div class="detail-title">📥 Request Body</div>
+            <div>${method.requestBody.description}</div>
+            <div class="code-block">${method.requestBody.example}</div>
+          </div>
+        `;
+      }
+      
+      // Response Format
+      html += `
+        <div class="detail-section">
+          <div class="detail-title">📤 Response Format</div>
+      `;
+      
+      Object.entries(method.responses).forEach(([code, response]) => {
+        if (response.example) {
+          html += `
+            <div style="margin-bottom: 15px;">
+              <strong>HTTP ${code}:</strong> ${response.description}
+              <div class="code-block">${response.example}</div>
+            </div>
+          `;
+        } else {
+          html += `<div><strong>HTTP ${code}:</strong> ${response.description}</div>`;
+        }
+      });
+      
+      html += '</div>';
+      
+      // Status Codes
+      html += `
+        <div class="detail-section">
+          <div class="detail-title">📊 Status Codes</div>
+          <div class="status-codes">
+      `;
+      
+      method.statusCodes.forEach(status => {
+        html += `
+          <div class="status-code ${status.type}">
+            <span class="status-code-number">${status.code}</span>
+            <span>${status.description}</span>
+          </div>
+        `;
+      });
+      
+      html += `
+          </div>
+        </div>
+      `;
+      
+      return html;
+    }
+    
+    function toggleMethodGroup(groupId) {
+      const methodList = document.getElementById(groupId);
+      const header = methodList.previousElementSibling;
+      const icon = header.querySelector('.expand-icon');
+      
+      if (methodList.classList.contains('expanded')) {
+        methodList.classList.remove('expanded');
+        header.classList.remove('expanded');
+        icon.textContent = '▶';
+      } else {
+        methodList.classList.add('expanded');
+        header.classList.add('expanded');
+        icon.textContent = '▼';
+      }
+    }
+    
+    function toggleMethodDetails(methodId) {
+      const details = document.getElementById(methodId);
+      const header = details.previousElementSibling;
+      const arrow = header.querySelector('.expand-arrow');
+      
+      if (details.classList.contains('expanded')) {
+        details.classList.remove('expanded');
+        header.classList.remove('expanded');
+        arrow.textContent = '▶';
+      } else {
+        details.classList.add('expanded');
+        header.classList.add('expanded');
+        arrow.textContent = '▼';
+      }
+    }
+    
+    function addMethodEventListeners() {
+      // Event listeners are added via onclick attributes in HTML
+      // This function can be used for additional event handling if needed
+    }
+    
+    function toggleNavService(serviceKey) {
+      const navSubmethods = document.getElementById(`nav-${serviceKey}`);
+      const navItem = navSubmethods.previousElementSibling;
+      const arrow = navItem.querySelector('.expand-arrow');
+      
+      if (navSubmethods.classList.contains('expanded')) {
+        navSubmethods.classList.remove('expanded');
+        navItem.classList.remove('expanded');
+        arrow.textContent = '▶';
+      } else {
+        // Close other expanded services
+        document.querySelectorAll('.nav-submethods.expanded').forEach(submethods => {
+          submethods.classList.remove('expanded');
+          const item = submethods.previousElementSibling;
+          item.classList.remove('expanded');
+          item.querySelector('.expand-arrow').textContent = '▶';
+        });
+        
+        navSubmethods.classList.add('expanded');
+        navItem.classList.add('expanded');
+        arrow.textContent = '▼';
+        
+        // Also show the service overview
+        showService(serviceKey);
+      }
+    }
+    
+    function showServiceMethod(serviceKey, methodIndex) {
+      const service = services[serviceKey];
+      if (!service || !service.methods) return;
+      
+      const method = service.methods[methodIndex];
+      if (!method) return;
+      
+      // Update active nav item (remove from all nav items)
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.querySelectorAll('.nav-submethod').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // Add active to clicked submethod
+      event.target.classList.add('active');
+      
+      // Update header
+      document.getElementById('service-title').textContent = `${service.title} - ${method.method} ${method.path}`;
+      document.getElementById('service-description').textContent = method.description;
+      
+      // Show method details
+      const overviewContent = document.getElementById('overview-content');
+      const swaggerUIContainer = document.getElementById('swagger-ui');
+      
+      overviewContent.style.display = 'block';
+      swaggerUIContainer.style.display = 'none';
+      
+      // Show single method details
+      overviewContent.innerHTML = `
+        <div class="api-methods">
+          <div class="method-group">
+            <div class="method-group-header expanded">
+              <span>${method.method} ${method.path}</span>
+              <span class="expand-icon">▼</span>
+            </div>
+            <div class="method-list expanded">
+              <div class="method-item">
+                <div class="method-header expanded">
+                  <div class="method-info">
+                    <span class="http-method ${method.method.toLowerCase()}">${method.method}</span>
+                    <span class="method-path">${method.path}</span>
+                    <span class="method-description">${method.description}</span>
+                  </div>
+                  <span class="expand-arrow">▼</span>
+                </div>
+                <div class="method-details expanded">
+                  <div class="details-content">
+                    ${createMethodDetails(method)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    function loadSwaggerUI(specUrl) {
+      // Clear previous instance
+      document.getElementById('swagger-ui').innerHTML = '';
+      
+      swaggerUI = SwaggerUIBundle({
+        url: specUrl,
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "BaseLayout", // Changed from StandaloneLayout
+        theme: "light",
+        defaultModelsExpandDepth: 2,
+        defaultModelExpandDepth: 2,
+        displayOperationId: true,
+        showExtensions: true,
+        showCommonExtensions: true,
+        tryItOutEnabled: true,
+        requestInterceptor: function(request) {
+          return request;
+        },
+        responseInterceptor: function(response) {
+          return response;
+        }
+      });
+    }
+
+    window.onload = function() {
+      // Initially show overview
+      showService('overview');
+      
+      // Load consolidated API for reference
+      loadSwaggerUI('./CONSOLIDATED_API.yaml');
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+@startuml
+!pragma charset UTF-8
+skinparam defaultFontName "Segoe UI"
+!define CORE_ENTITY(name,desc) class name as "desc" << (C,#FF6B6B) >>
+!define SUPPORT_ENTITY(name,desc) class name as "desc" << (S,#4ECDC4) >>
+!define FUTURE_ENTITY(name,desc) class name as "desc" << (F,#DDDDDD) >>
+
+title Complete Smart Home System ER-диаграмма (MVP)
+
+' ДОМЕН ПОЛЬЗОВАТЕЛЕЙ (MVP)
+package "User Domain" {
+    CORE_ENTITY(User, "User\n---\nid: UUID [PK]\nemail: VARCHAR(255)\nfirst_name: VARCHAR(100)\nlast_name: VARCHAR(100)\nis_active: BOOLEAN")
+    
+    CORE_ENTITY(Household, "Household\n---\nid: UUID [PK]\nowner_id: UUID [FK]\nname: VARCHAR(100)\naddress: TEXT")
+}
+
+' ДОМЕН УСТРОЙСТВ (MVP)
+package "Device Domain" {
+    CORE_ENTITY(Device, "Device\n---\nid: SERIAL [PK]\nname: VARCHAR(100)\ntype: VARCHAR(50)\nlocation: VARCHAR(100)\nstatus: VARCHAR(20)\nuser_id: BIGINT")
+}
+
+' ДОМЕН ТЕЛЕМЕТРИИ (MVP)
+package "Telemetry Domain" {
+    CORE_ENTITY(TelemetryReading, "TelemetryReading\n---\nid: SERIAL [PK]\ndevice_id: VARCHAR(50)\ndevice_type: VARCHAR(50)\nlocation: VARCHAR(100)\nmetric_name: VARCHAR(50)\nvalue: FLOAT\nunit: VARCHAR(20)\ntimestamp: TIMESTAMP")
+}
+
+' ДОМЕН АВТОМАТИЗАЦИИ (MVP)
+package "Automation Domain" {
+    CORE_ENTITY(Scenario, "Scenario\n---\nid: UUID [PK]\nhousehold_id: UUID [FK]\ncreated_by: UUID [FK]\nname: VARCHAR(100)\ndescription: TEXT\nis_active: BOOLEAN")
+    
+    CORE_ENTITY(ScenarioAction, "ScenarioAction\n---\nid: UUID [PK]\nscenario_id: UUID [FK]\ndevice_id: VARCHAR(100)\naction_type: VARCHAR(50)\nparameters: TEXT\norder_position: INTEGER")
+}
+
+' ДОМЕН БИЛЛИНГА (MVP)
+package "Billing Domain" {
+    CORE_ENTITY(PricingPlan, "PricingPlan\n---\nid: UUID [PK]\nname: VARCHAR(100)\ndescription: TEXT\nprice: DECIMAL(10,2)\nbilling_interval: VARCHAR(20)\ndevice_limit: INTEGER\nis_active: BOOLEAN")
+    
+    CORE_ENTITY(Subscription, "Subscription\n---\nid: UUID [PK]\nuser_id: UUID [FK]\nplan_id: UUID [FK]\nstatus: VARCHAR(20)\nstarted_at: TIMESTAMP\nends_at: TIMESTAMP")
+}
+
+
+' ОСНОВНЫЕ СВЯЗИ (MVP)
+User ||--o{ Household : "1:N владеет"
+
+User ||--o{ Device : "1:N владеет"
+Device ||--o{ TelemetryReading : "1:N генерирует"
+
+Household ||--o{ Scenario : "1:N содержит"
+User ||--o{ Scenario : "1:N создает"
+Scenario ||--o{ ScenarioAction : "1:N определяет"
+
+User ||--o{ Subscription : "1:N имеет"
+PricingPlan ||--o{ Subscription : "1:N определяет"
+
+
+' ПРИМЕЧАНИЯ О СТАТУСЕ СИСТЕМЫ
+note bottom : **🏠 Статус Smart Home System:**\n\n**✅ РЕАЛИЗОВАНО:**\n• **User Domain:** Базовые пользователи и дома\n• **Device Domain:** Простое управление устройствами\n• **Telemetry Domain:** Базовый сбор данных\n• **Automation Domain:** Только ручные сценарии\n• **Billing Domain:** Базовые тарифные планы\n\n**ОБЛАСТЬ:**\n• Только основная функциональность\n• Ручные операции\n• Базовые структуры данных\n• Основные функции для запуска
+
+note right of User : **User:**\n✅ Базовые профили пользователей\n✅ Простое владение домом\n✅ Управление аккаунтом\n✅ Основные данные пользователя
+
+note left of Device : **Device:**\n✅ Базовая регистрация устройств\n✅ Простое отслеживание статуса\n✅ Владение устройствами\n✅ Основные типы устройств
+
+note top of TelemetryReading : **Telemetry:**\n✅ Базовые показания датчиков\n✅ Простой сбор данных\n✅ Мониторинг температуры\n✅ Отслеживание временных меток
+
+note bottom of Scenario : **Automation:**\n✅ Только ручные сценарии\n✅ Базовые действия устройств\n✅ Простое управление вкл/выкл\n✅ Выполнение по запросу пользователя
+
+note right of PricingPlan : **Billing:**\n✅ Базовые тарифные планы\n✅ Простые подписки\n✅ Лимиты устройств\n✅ Месячная оплата
+
+@enduml

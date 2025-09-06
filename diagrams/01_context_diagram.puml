@@ -1,0 +1,34 @@
+@startuml
+!pragma charset UTF-8
+skinparam defaultFontName "Segoe UI"
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Диаграмма контекста системы "Умный дом" (TO-BE)
+
+' Пользователи системы
+Person(homeowner, "Владелец дома", "Управляет устройствами, настраивает сценарии, просматривает телеметрию")
+Person(support_team, "Команда поддержки", "Техническая поддержка пользователей")
+
+' Основная система
+System(smart_home_platform, "Платформа «Умный дом»", "SaaS платформа для управления умными устройствами")
+
+' Внешние системы
+System_Ext(smart_devices, "Умные устройства", "IoT устройства в домах пользователей")
+System_Ext(partner_devices, "Устройства партнёров", "Сторонние совместимые устройства")
+System_Ext(payment_system, "Платёжная система", "Обработка платежей и подписок")
+
+' Взаимодействие с пользователями
+Rel(homeowner, smart_home_platform, "Использует веб/мобильное приложение", "HTTPS")
+Rel(support_team, smart_home_platform, "Предоставляет техподдержку", "HTTPS")
+
+' Взаимодействие с внешними системами
+Rel(smart_home_platform, smart_devices, "Управляет и получает телеметрию", "IoT протоколы")
+Rel(smart_home_platform, partner_devices, "Интегрируется", "Стандартные протоколы")
+Rel(smart_home_platform, payment_system, "Обрабатывает платежи", "API")
+
+' Контекстные примечания
+note right of smart_home_platform : **Ключевые характеристики:**\n• SaaS модель предоставления\n• Самообслуживание пользователями\n• Поддержка множества устройств\n• Облачная архитектура
+
+note left of homeowner : **Модель использования:**\n• Самостоятельная установка устройств\n• Удалённое управление\n• Настройка автоматизации\n• Оплата подписок
+
+@enduml

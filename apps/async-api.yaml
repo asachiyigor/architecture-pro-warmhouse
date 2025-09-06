@@ -1,0 +1,482 @@
+asyncapi: 3.0.0
+info:
+  title: Smart Home Event-Driven API
+  version: 1.0.0
+  description: |
+    Асинхронное API для событийно-ориентированного взаимодействия между микросервисами умного дома.
+    Используется для уведомлений, алертов и автоматизации процессов.
+  contact:
+    name: Smart Home Team
+    email: smarthome@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  rabbitmq-dev:
+    host: localhost:5672
+    protocol: amqp
+    description: Development RabbitMQ server
+  rabbitmq-prod:
+    host: rabbitmq:5672
+    protocol: amqp
+    description: Production RabbitMQ server in Docker
+
+channels:
+  sensor/temperature/readings:
+    description: Канал для публикации показаний температурных датчиков
+    messages:
+      temperatureReading:
+        $ref: '#/components/messages/TemperatureReading'
+
+  sensor/temperature/alerts:
+    description: Канал для критических уведомлений о температуре
+    messages:
+      temperatureAlert:
+        $ref: '#/components/messages/TemperatureAlert'
+
+  sensor/status/changed:
+    description: Канал для уведомлений об изменении статуса датчиков
+    messages:
+      sensorStatusChanged:
+        $ref: '#/components/messages/SensorStatusChanged'
+
+  automation/triggers:
+    description: Канал для триггеров автоматизации
+    messages:
+      automationTrigger:
+        $ref: '#/components/messages/AutomationTrigger'
+
+  system/notifications:
+    description: Канал для системных уведомлений
+    messages:
+      systemNotification:
+        $ref: '#/components/messages/SystemNotification'
+
+operations:
+  publishTemperatureReading:
+    action: send
+    channel:
+      $ref: '#/channels/sensor/temperature/readings'
+    summary: Публикация показаний температуры
+    description: |
+      Temperature API публикует новые показания температуры каждые 30 секунд
+      для всех активных датчиков.
+    messages:
+      - $ref: '#/channels/sensor/temperature/readings/messages/temperatureReading'
+
+  subscribeTemperatureReadings:
+    action: receive
+    channel:
+      $ref: '#/channels/sensor/temperature/readings'
+    summary: Подписка на показания температуры
+    description: |
+      Smart Home сервис подписывается на показания температуры
+      для обновления базы данных и запуска автоматизации.
+    messages:
+      - $ref: '#/channels/sensor/temperature/readings/messages/temperatureReading'
+
+  publishTemperatureAlert:
+    action: send
+    channel:
+      $ref: '#/channels/sensor/temperature/alerts'
+    summary: Публикация критических уведомлений
+    description: |
+      Публикуется при выходе температуры за критические пороги
+      (ниже 10°C или выше 35°C).
+    messages:
+      - $ref: '#/channels/sensor/temperature/alerts/messages/temperatureAlert'
+
+  subscribeTemperatureAlerts:
+    action: receive
+    channel:
+      $ref: '#/channels/sensor/temperature/alerts'
+    summary: Подписка на критические уведомления
+    description: |
+      Notification Service подписывается на критические уведомления
+      для отправки push-уведомлений пользователям.
+    messages:
+      - $ref: '#/channels/sensor/temperature/alerts/messages/temperatureAlert'
+
+  publishSensorStatusChange:
+    action: send
+    channel:
+      $ref: '#/channels/sensor/status/changed'
+    summary: Публикация изменения статуса датчика
+    description: |
+      Публикуется при изменении статуса датчика
+      (active → inactive, error, maintenance).
+    messages:
+      - $ref: '#/channels/sensor/status/changed/messages/sensorStatusChanged'
+
+  subscribeSensorStatusChanges:
+    action: receive
+    channel:
+      $ref: '#/channels/sensor/status/changed'
+    summary: Подписка на изменения статуса датчиков
+    description: |
+      Monitoring Service подписывается на изменения статуса
+      для отслеживания работоспособности системы.
+    messages:
+      - $ref: '#/channels/sensor/status/changed/messages/sensorStatusChanged'
+
+  publishAutomationTrigger:
+    action: send
+    channel:
+      $ref: '#/channels/automation/triggers'
+    summary: Публикация триггера автоматизации
+    description: |
+      Публикуется при выполнении условий для запуска автоматизации
+      (например, температура выше порога → включить кондиционер).
+    messages:
+      - $ref: '#/channels/automation/triggers/messages/automationTrigger'
+
+  subscribeAutomationTriggers:
+    action: receive
+    channel:
+      $ref: '#/channels/automation/triggers'
+    summary: Подписка на триггеры автоматизации
+    description: |
+      Automation Service подписывается на триггеры
+      для выполнения автоматических действий.
+    messages:
+      - $ref: '#/channels/automation/triggers/messages/automationTrigger'
+
+  publishSystemNotification:
+    action: send
+    channel:
+      $ref: '#/channels/system/notifications'
+    summary: Публикация системных уведомлений
+    description: |
+      Публикуется при важных системных событиях
+      (запуск/остановка сервисов, ошибки, обновления).
+    messages:
+      - $ref: '#/channels/system/notifications/messages/systemNotification'
+
+  subscribeSystemNotifications:
+    action: receive
+    channel:
+      $ref: '#/channels/system/notifications'
+    summary: Подписка на системные уведомления
+    description: |
+      Logging Service и Monitoring Service подписываются
+      на системные события для логирования и мониторинга.
+    messages:
+      - $ref: '#/channels/system/notifications/messages/systemNotification'
+
+components:
+  messages:
+    TemperatureReading:
+      name: TemperatureReading
+      title: Показания температуры
+      summary: Регулярные показания температурного датчика
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/TemperatureReadingPayload'
+      examples:
+        - name: kitchen_reading
+          summary: Показания с кухни
+          payload:
+            sensor_id: "1"
+            location: "Kitchen"
+            value: 23.5
+            unit: "°C"
+            timestamp: "2024-01-15T10:30:00Z"
+            status: "active"
+
+    TemperatureAlert:
+      name: TemperatureAlert
+      title: Критическое уведомление о температуре
+      summary: Уведомление при критических значениях температуры
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/TemperatureAlertPayload'
+      examples:
+        - name: high_temperature_alert
+          summary: Высокая температура
+          payload:
+            sensor_id: "2"
+            location: "Bedroom"
+            current_value: 36.8
+            threshold_value: 35.0
+            alert_type: "high_temperature"
+            severity: "critical"
+            timestamp: "2024-01-15T14:45:00Z"
+            message: "Temperature in Bedroom exceeded critical threshold"
+
+    SensorStatusChanged:
+      name: SensorStatusChanged
+      title: Изменение статуса датчика
+      summary: Уведомление об изменении статуса работы датчика
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/SensorStatusChangedPayload'
+      examples:
+        - name: sensor_inactive
+          summary: Датчик перешел в неактивное состояние
+          payload:
+            sensor_id: "3"
+            location: "Living Room"
+            old_status: "active"
+            new_status: "inactive"
+            reason: "communication_timeout"
+            timestamp: "2024-01-15T11:20:00Z"
+
+    AutomationTrigger:
+      name: AutomationTrigger
+      title: Триггер автоматизации
+      summary: Событие для запуска автоматического действия
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/AutomationTriggerPayload'
+      examples:
+        - name: ac_trigger
+          summary: Триггер включения кондиционера
+          payload:
+            trigger_id: "temp_ac_001"
+            rule_name: "High Temperature AC Control"
+            sensor_id: "1"
+            location: "Kitchen"
+            condition: "temperature > 28"
+            current_value: 29.5
+            action_type: "turn_on_device"
+            target_device: "kitchen_ac"
+            timestamp: "2024-01-15T15:30:00Z"
+
+    SystemNotification:
+      name: SystemNotification
+      title: Системное уведомление
+      summary: Важные события в работе системы
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/SystemNotificationPayload'
+      examples:
+        - name: service_started
+          summary: Запуск сервиса
+          payload:
+            event_type: "service_started"
+            service_name: "temperature-api"
+            severity: "info"
+            message: "Temperature API service started successfully"
+            timestamp: "2024-01-15T08:00:00Z"
+            metadata:
+              version: "1.0.0"
+              port: "8081"
+
+  schemas:
+    TemperatureReadingPayload:
+      type: object
+      required:
+        - sensor_id
+        - location
+        - value
+        - unit
+        - timestamp
+        - status
+      properties:
+        sensor_id:
+          type: string
+          description: Идентификатор датчика
+          example: "1"
+        location:
+          type: string
+          description: Местоположение датчика
+          example: "Kitchen"
+        value:
+          type: number
+          format: float
+          description: Значение температуры
+          example: 23.5
+        unit:
+          type: string
+          description: Единица измерения
+          example: "°C"
+        timestamp:
+          type: string
+          format: date-time
+          description: Время измерения
+          example: "2024-01-15T10:30:00Z"
+        status:
+          type: string
+          enum: [active, inactive, error]
+          description: Статус датчика
+          example: "active"
+
+    TemperatureAlertPayload:
+      type: object
+      required:
+        - sensor_id
+        - location
+        - current_value
+        - threshold_value
+        - alert_type
+        - severity
+        - timestamp
+        - message
+      properties:
+        sensor_id:
+          type: string
+          description: Идентификатор датчика
+          example: "2"
+        location:
+          type: string
+          description: Местоположение датчика
+          example: "Bedroom"
+        current_value:
+          type: number
+          format: float
+          description: Текущее значение температуры
+          example: 36.8
+        threshold_value:
+          type: number
+          format: float
+          description: Пороговое значение
+          example: 35.0
+        alert_type:
+          type: string
+          enum: [high_temperature, low_temperature, sensor_malfunction]
+          description: Тип критического уведомления
+          example: "high_temperature"
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+          description: Критичность уведомления
+          example: "critical"
+        timestamp:
+          type: string
+          format: date-time
+          description: Время события
+          example: "2024-01-15T14:45:00Z"
+        message:
+          type: string
+          description: Описание события
+          example: "Temperature in Bedroom exceeded critical threshold"
+
+    SensorStatusChangedPayload:
+      type: object
+      required:
+        - sensor_id
+        - location
+        - old_status
+        - new_status
+        - timestamp
+      properties:
+        sensor_id:
+          type: string
+          description: Идентификатор датчика
+          example: "3"
+        location:
+          type: string
+          description: Местоположение датчика
+          example: "Living Room"
+        old_status:
+          type: string
+          enum: [active, inactive, error, maintenance]
+          description: Предыдущий статус
+          example: "active"
+        new_status:
+          type: string
+          enum: [active, inactive, error, maintenance]
+          description: Новый статус
+          example: "inactive"
+        reason:
+          type: string
+          description: Причина изменения статуса
+          example: "communication_timeout"
+        timestamp:
+          type: string
+          format: date-time
+          description: Время изменения
+          example: "2024-01-15T11:20:00Z"
+
+    AutomationTriggerPayload:
+      type: object
+      required:
+        - trigger_id
+        - rule_name
+        - sensor_id
+        - location
+        - condition
+        - current_value
+        - action_type
+        - timestamp
+      properties:
+        trigger_id:
+          type: string
+          description: Уникальный идентификатор триггера
+          example: "temp_ac_001"
+        rule_name:
+          type: string
+          description: Название правила автоматизации
+          example: "High Temperature AC Control"
+        sensor_id:
+          type: string
+          description: Идентификатор датчика
+          example: "1"
+        location:
+          type: string
+          description: Местоположение
+          example: "Kitchen"
+        condition:
+          type: string
+          description: Условие срабатывания
+          example: "temperature > 28"
+        current_value:
+          type: number
+          format: float
+          description: Текущее значение
+          example: 29.5
+        action_type:
+          type: string
+          enum: [turn_on_device, turn_off_device, send_notification, adjust_temperature]
+          description: Тип действия
+          example: "turn_on_device"
+        target_device:
+          type: string
+          description: Целевое устройство (если применимо)
+          example: "kitchen_ac"
+        timestamp:
+          type: string
+          format: date-time
+          description: Время триггера
+          example: "2024-01-15T15:30:00Z"
+
+    SystemNotificationPayload:
+      type: object
+      required:
+        - event_type
+        - service_name
+        - severity
+        - message
+        - timestamp
+      properties:
+        event_type:
+          type: string
+          enum: [service_started, service_stopped, service_error, database_connection, api_error]
+          description: Тип системного события
+          example: "service_started"
+        service_name:
+          type: string
+          description: Название сервиса
+          example: "temperature-api"
+        severity:
+          type: string
+          enum: [debug, info, warning, error, critical]
+          description: Уровень важности
+          example: "info"
+        message:
+          type: string
+          description: Описание события
+          example: "Temperature API service started successfully"
+        timestamp:
+          type: string
+          format: date-time
+          description: Время события
+          example: "2024-01-15T08:00:00Z"
+        metadata:
+          type: object
+          description: Дополнительные данные о событии
+          additionalProperties: true
+          example:
+            version: "1.0.0"
+            port: "8081"
